@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Java / Maven
+target/
+*.class
+*.log
+.mvn/timing.properties
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.joblib
+*.pkl
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+application-local.yml
+
+# OS / editors
+Thumbs.db
+*.swp
