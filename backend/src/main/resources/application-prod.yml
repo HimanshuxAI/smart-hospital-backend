@@ -1,0 +1,21 @@
+# Production only. Activate with SPRING_PROFILES_ACTIVE=prod.
+# Supply all credentials through the environment; the database certificate must be
+# trusted by the JVM trust store because Connector/J verifies the server identity.
+spring:
+  datasource:
+    url: "${DB_URL}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    hikari:
+      data-source-properties:
+        sslMode: VERIFY_IDENTITY
+        serverTimezone: UTC
+  security:
+    user:
+      name: "${SECURITY_USERNAME}"
+      password: "${SECURITY_PASSWORD}"
+
+smart-hospital:
+  security:
+    jwt:
+      secret: "${JWT_SECRET}"

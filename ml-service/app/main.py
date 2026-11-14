@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI(
     title="Smart Hospital ML Service",
@@ -7,6 +8,11 @@ app = FastAPI(
 )
 
 
-@app.get("/health", tags=["Health"], summary="Service health")
-def health() -> dict[str, str]:
-    return {"status": "UP", "service": "smart-hospital-ml"}
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+
+
+@app.get("/health", tags=["Health"], summary="Service health", response_model=HealthResponse)
+def health() -> HealthResponse:
+    return HealthResponse(status="UP", service="smart-hospital-ml")
