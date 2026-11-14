@@ -1,10 +1,14 @@
+# Activate profiles explicitly:
+#   Local development: SPRING_PROFILES_ACTIVE=local
+#   Production:        SPRING_PROFILES_ACTIVE=prod
+#                      (with DB_*, SECURITY_*, and JWT_SECRET supplied)
 spring:
   application:
     name: smart-hospital-backend
   datasource:
-    url: "${DB_URL:jdbc:mysql://localhost:3306/smart_hospital?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}"
-    username: "${DB_USERNAME:root}"
-    password: "${DB_PASSWORD:root}"
+    url: "${DB_URL}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -20,8 +24,8 @@ spring:
     time-zone: UTC
   security:
     user:
-      name: "${SECURITY_USERNAME:local-user}"
-      password: "${SECURITY_PASSWORD:local-development-password}"
+      name: "${SECURITY_USERNAME}"
+      password: "${SECURITY_PASSWORD}"
 
 server:
   port: "${SERVER_PORT:8080}"
@@ -52,9 +56,10 @@ springdoc:
 smart-hospital:
   security:
     jwt:
-      secret: "${JWT_SECRET:local-development-jwt-secret-change-before-production}"
-      access-token-expiration: "${JWT_ACCESS_TOKEN_EXPIRATION:PT1H}"
-      refresh-token-expiration: "${JWT_REFRESH_TOKEN_EXPIRATION:P7D}"
+      secret: "${JWT_SECRET}"
+      access-token-expiration: "${JWT_ACCESS_TOKEN_EXPIRATION:PT15M}"
+    refresh-token:
+      expiration: "${JWT_REFRESH_TOKEN_EXPIRATION:P7D}"
   ml:
     base-url: "${ML_SERVICE_BASE_URL:http://localhost:8000}"
     connect-timeout: "${ML_SERVICE_CONNECT_TIMEOUT:2s}"

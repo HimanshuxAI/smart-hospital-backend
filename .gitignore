@@ -19,6 +19,9 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+build/
+dist/
+.eggs/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
@@ -32,7 +35,6 @@ htmlcov/
 .env
 .env.*
 !.env.example
-application-local.yml
 
 # OS / editors
 Thumbs.db
