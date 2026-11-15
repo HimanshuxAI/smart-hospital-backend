@@ -31,6 +31,10 @@ class ApplicationProfileConfigurationTests {
         assertThat(value(configuration, "spring.security.user.name")).isEqualTo("${SECURITY_USERNAME}");
         assertThat(value(configuration, "spring.security.user.password")).isEqualTo("${SECURITY_PASSWORD}");
         assertThat(value(configuration, "smart-hospital.security.jwt.secret")).isEqualTo("${JWT_SECRET}");
+        assertThat(value(configuration, "smart-hospital.security.jwt.issuer"))
+                .isEqualTo("${JWT_ISSUER:smart-hospital-backend}");
+        assertThat(value(configuration, "spring.jackson.deserialization.fail-on-unknown-properties"))
+                .isEqualTo("true");
         assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:false}");
     }
 
@@ -67,6 +71,8 @@ class ApplicationProfileConfigurationTests {
                 .isEqualTo("local-development-password");
         assertThat(value(configuration, "smart-hospital.security.jwt.secret"))
                 .isEqualTo("local-development-jwt-secret-change-before-production");
+        assertThat(value(configuration, "smart-hospital.security.jwt.issuer"))
+                .isEqualTo("smart-hospital-backend-local");
         assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:true}");
     }
 
@@ -84,6 +90,9 @@ class ApplicationProfileConfigurationTests {
         assertThat(value(configuration, "spring.security.user.name")).isEqualTo("${SECURITY_USERNAME}");
         assertThat(value(configuration, "spring.security.user.password")).isEqualTo("${SECURITY_PASSWORD}");
         assertThat(value(configuration, "smart-hospital.security.jwt.secret")).isEqualTo("${JWT_SECRET}");
+        assertThat(value(configuration, "smart-hospital.security.jwt.issuer")).isEqualTo("${JWT_ISSUER}");
+        assertThat(value(configuration, "smart-hospital.security.refresh-token.expiration"))
+                .isEqualTo("${JWT_REFRESH_TOKEN_EXPIRATION}");
     }
 
     @Test

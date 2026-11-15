@@ -6,7 +6,7 @@ import com.smarthospital.SmartHospitalApplication;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
@@ -15,7 +15,7 @@ class JwtSecretStartupValidationTests {
 
     private static final String VALID_SECRET = "test-jwt-secret-with-at-least-32-characters";
 
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+    private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
             .withInitializer(hermeticConfigDataInitializer())
             .withUserConfiguration(SmartHospitalApplication.class)
             .withPropertyValues(
@@ -25,10 +25,12 @@ class JwtSecretStartupValidationTests {
                     "DB_PASSWORD=",
                     "SECURITY_USERNAME=test-user",
                     "SECURITY_PASSWORD=test-password",
+                    "JWT_ISSUER=smart-hospital-backend-test",
+                    "JWT_REFRESH_TOKEN_EXPIRATION=P7D",
                     "spring.jpa.hibernate.ddl-auto=create-drop",
                     "spring.flyway.enabled=false");
 
-    private final ApplicationContextRunner localContextRunner = new ApplicationContextRunner()
+    private final WebApplicationContextRunner localContextRunner = new WebApplicationContextRunner()
             .withInitializer(hermeticConfigDataInitializer())
             .withUserConfiguration(SmartHospitalApplication.class)
             .withPropertyValues(
@@ -102,6 +104,26 @@ class JwtSecretStartupValidationTests {
     }
 
     @Test
+    void productionStartupRejectsBlankJwtIssuer() {
+        contextRunner.withPropertyValues("JWT_ISSUER=   ").run(context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure())
+                    .hasStackTraceContaining("JWT issuer must not be blank");
+        });
+    }
+
+    @Test
+    void productionStartupRejectsNonPositiveRefreshTokenExpiration() {
+        contextRunner.withPropertyValues(
+                "JWT_SECRET=" + VALID_SECRET,
+                "JWT_REFRESH_TOKEN_EXPIRATION=PT0S").run(context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure())
+                    .hasStackTraceContaining("Refresh token expiration must be positive");
+        });
+    }
+
+    @Test
     void productionStartupBindsValidJwtSecret() {
         contextRunner.withPropertyValues(
                 "JWT_SECRET=" + VALID_SECRET,
@@ -111,6 +133,7 @@ class JwtSecretStartupValidationTests {
             TokenProperties tokenProperties = context.getBean(TokenProperties.class);
             assertThat(tokenProperties.secret()).isEqualTo(VALID_SECRET);
             assertThat(tokenProperties.accessTokenExpiration()).isEqualTo(Duration.ofMinutes(15));
+            assertThat(tokenProperties.issuer()).isEqualTo("smart-hospital-backend-test");
         });
     }
 
@@ -122,6 +145,7 @@ class JwtSecretStartupValidationTests {
             TokenProperties tokenProperties = context.getBean(TokenProperties.class);
             assertThat(tokenProperties.secret())
                     .isEqualTo("local-development-jwt-secret-change-before-production");
+            assertThat(tokenProperties.issuer()).isEqualTo("smart-hospital-backend-local");
         });
     }
 
