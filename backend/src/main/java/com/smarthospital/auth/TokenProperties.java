@@ -24,4 +24,14 @@ public record TokenProperties(
     public boolean isSecretConfigured() {
         return secret != null && !secret.isBlank() && !UNRESOLVED_PLACEHOLDER.matcher(secret).find();
     }
+
+    @AssertTrue(message = "Access token expiration must be positive")
+    public boolean isAccessTokenExpirationPositive() {
+        return accessTokenExpiration == null || accessTokenExpiration.compareTo(Duration.ZERO) > 0;
+    }
+
+    @Override
+    public String toString() {
+        return "TokenProperties[secret=REDACTED, accessTokenExpiration=" + accessTokenExpiration + "]";
+    }
 }

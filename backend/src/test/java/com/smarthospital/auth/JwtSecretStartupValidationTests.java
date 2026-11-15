@@ -80,8 +80,32 @@ class JwtSecretStartupValidationTests {
     }
 
     @Test
+    void productionStartupRejectsZeroAccessTokenExpiration() {
+        contextRunner.withPropertyValues(
+                "JWT_SECRET=" + VALID_SECRET,
+                "JWT_ACCESS_TOKEN_EXPIRATION=PT0S").run(context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure())
+                    .hasStackTraceContaining("Access token expiration must be positive");
+        });
+    }
+
+    @Test
+    void productionStartupRejectsNegativeAccessTokenExpiration() {
+        contextRunner.withPropertyValues(
+                "JWT_SECRET=" + VALID_SECRET,
+                "JWT_ACCESS_TOKEN_EXPIRATION=PT-1S").run(context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure())
+                    .hasStackTraceContaining("Access token expiration must be positive");
+        });
+    }
+
+    @Test
     void productionStartupBindsValidJwtSecret() {
-        contextRunner.withPropertyValues("JWT_SECRET=" + VALID_SECRET).run(context -> {
+        contextRunner.withPropertyValues(
+                "JWT_SECRET=" + VALID_SECRET,
+                "JWT_ACCESS_TOKEN_EXPIRATION=PT15M").run(context -> {
             assertThat(context).hasNotFailed();
 
             TokenProperties tokenProperties = context.getBean(TokenProperties.class);
