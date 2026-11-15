@@ -12,13 +12,14 @@ The release includes:
 
 - A Java 21 Spring Boot REST API backed by MySQL.
 - A Python FastAPI machine-learning sidecar for waiting-time prediction.
+- A responsive React single-page application for patient, doctor, and administrator workflows.
 - JWT authentication with patient, doctor, and administrator roles.
 - Patient, doctor, appointment, queue, emergency-priority, and dashboard workflows.
 - Deterministic Java fallback when the ML sidecar is unavailable.
 - OpenAPI documentation with Swagger UI.
-- Automated tests, seed data, Docker support, and GitHub Actions CI.
+- Automated backend, frontend, and Python tests plus deterministic seed data.
 
-Explicitly outside this release: patient medical-record management, payments, SMS/push notifications, online consultation, multi-hospital tenancy, and a frontend application.
+Explicitly outside this release: patient medical-record management, payments, SMS/push notifications, online consultation, and multi-hospital tenancy.
 
 ## 2. Architecture
 
@@ -72,16 +73,23 @@ This approach provides a simple local setup and clear transaction boundaries whi
    - Doctor dashboard: today's appointments and active queue.
    - Patient dashboard: upcoming appointments and current queue state.
 
+8. **Frontend application module**
+   - A route-split React application presents patient, doctor, and administrator workspaces.
+   - The browser never owns clinical state; TanStack Query caches typed API responses and mutations invalidate affected views.
+   - Access tokens remain in memory, refresh tokens remain in `sessionStorage`, and a failed session returns to public authentication routes.
+   - A deterministic demo adapter can preview incomplete screens without changing the production HTTP behavior.
+
 ### 2.3 Runtime topology
 
 For local-first development:
 
-- MySQL runs natively or through Docker Compose.
+- MySQL runs natively.
 - The Spring Boot API runs from the Maven wrapper.
 - The Python service runs in a Python virtual environment.
-- Tests use isolated containers/databases where required.
+- The frontend runs through Vite and targets the `/api/v1` Spring Boot origin.
+- Backend integration tests use isolated MySQL instances where required.
 
-Docker Compose is supplied as a convenience for MySQL and for running the complete stack, but it is not mandatory for normal development.
+The repository intentionally omits deployment automation and hosted workflow definitions. Local setup and release verification are documented as direct host commands so the project stays lightweight and portable.
 
 ## 3. Technology decisions
 
@@ -99,7 +107,10 @@ Docker Compose is supplied as a convenience for MySQL and for running the comple
 | Error format | RFC 9457 problem details | Consistent machine-readable API errors |
 | ML API | FastAPI | Lightweight, typed Python service |
 | ML model | scikit-learn | Transparent baseline suitable for an academic project |
-| Tests | JUnit 5, Mockito, Spring Boot tests, pytest | Covers Java and Python layers |
+| Frontend | React 19 + TypeScript 7 + Vite 8 | Fast, typed, route-split browser application |
+| Frontend state | TanStack Query + React Router | Server-state caching and route-aware navigation without a global store |
+| Frontend styling | Tailwind CSS 4 + CSS tokens | Small responsive design system with no external font or chart dependency |
+| Tests | JUnit 5, Mockito, Spring Boot tests, pytest, Vitest, Testing Library | Covers backend, Python, and critical frontend behavior |
 
 Dependencies are pinned to compatible versions in Maven and Python lock/requirements files.
 
@@ -305,14 +316,14 @@ The trained artifact is versioned. The service exposes health and prediction end
 
 A deterministic demo sequence covers registration, login, booking, check-in, queue token retrieval, emergency classification, doctor queue progression, and waiting-time response.
 
-## 12. DevOps and repository workflow
+## 12. Repository workflow
 
 - The GitHub repository is private under `HimanshuxAI/smart-hospital-backend`.
 - Work is committed in small, logically grouped commits with conventional commit-style messages.
-- Each completed work unit is pushed to `main`; no history is rewritten or force-pushed.
-- GitHub Actions runs Java tests and Python tests on pushes and pull requests.
-- Docker Compose provides MySQL and an optional full-stack profile.
+- Each completed work unit is pushed to its feature branch; no history is rewritten or force-pushed.
+- Verification runs directly through Maven, pytest, npm, TypeScript, and Vitest commands documented in the plans.
 - `.env.example` documents required variables without storing secrets.
+- Deployment automation and hosted workflow definitions are intentionally excluded from this release.
 
 ## 13. Implementation sequence
 
@@ -324,22 +335,26 @@ A deterministic demo sequence covers registration, login, booking, check-in, que
 6. Implement appointment booking, cancellation, check-in, and digital tokens.
 7. Implement queue ordering, emergency priority, doctor transitions, audits, and dashboards.
 8. Implement the Python model service and Java fallback/ML integration.
-9. Add API documentation, Docker Compose, tests, and CI.
-10. Run the complete verification suite and document demo credentials and workflows.
+9. Build the responsive frontend foundation, design system, typed API boundary, and authentication lifecycle.
+10. Build patient, doctor, and administrator workspaces with route guards and complete state handling.
+11. Add frontend regression tests, accessibility checks, bundle-budget enforcement, and responsive verification.
+12. Run the complete local verification suite and document demo credentials and workflows.
 
 ## 14. Acceptance criteria
 
 The release is complete when:
 
 - A clean checkout can be configured, built, migrated, seeded, and started locally.
-- The documented demo credentials can log in through the API.
-- Patients can book, cancel, and check in to appointments.
+- The documented demo credentials can log in through the API and the frontend.
+- Patients can browse departments and doctors, book and cancel appointments, check in, and track a digital queue token through the responsive frontend.
+- Doctors can review today's schedule, manage the live queue, triage entries, and update their profile through the frontend.
+- Administrators can review aggregate metrics, manage users and doctors, and inspect departments, schedules, appointments, and queues through the frontend.
 - Check-in produces a unique digital token and queue position.
-- Emergency entries outrank normal entries in the documented tier order.
-- Doctors can advance the queue with valid state transitions.
-- Admins can manage doctors, departments, schedules, and users.
-- The waiting-time endpoint works with the Python service and through the Java fallback when Python is unavailable.
+- Emergency entries outrank normal entries in the documented tier order and in the frontend queue board.
+- The frontend correctly parses RFC 9457 problem details, retries one serialized refresh after a 401, and never stores an access token outside memory.
+- Route guards prevent cross-role access and provide role-aware redirects and accessible 403/404 pages.
+- The frontend meets WCAG AA contrast, semantic landmark, visible-focus, keyboard-operation, form-error association, and reduced-motion requirements.
+- Initial route JavaScript remains below 200 KB gzip; the production build fails the repeatable bundle-budget check if it regresses.
 - Swagger UI exposes the API contract.
-- Automated Java and Python tests pass.
-- GitHub Actions passes on the pushed commit.
-- The repository is private and contains incremental, readable commits.
+- Automated Java, Python, and frontend tests pass; TypeScript typechecking and the frontend production build succeed.
+- `git diff --check` is clean, no secrets or generated bulky artifacts are tracked, and the repository contains incremental, readable commits.
