@@ -19,3 +19,6 @@ smart-hospital:
   security:
     jwt:
       secret: "${JWT_SECRET}"
+      issuer: "${JWT_ISSUER}"
+    refresh-token:
+      expiration: "${JWT_REFRESH_TOKEN_EXPIRATION}"

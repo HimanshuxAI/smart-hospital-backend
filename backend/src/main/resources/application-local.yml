@@ -18,3 +18,4 @@ smart-hospital:
   security:
     jwt:
       secret: local-development-jwt-secret-change-before-production
+      issuer: smart-hospital-backend-local
