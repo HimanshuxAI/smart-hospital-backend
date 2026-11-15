@@ -19,17 +19,66 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
             LocalDate queueDate,
             int tokenNumber);
 
-    List<QueueEntry> findByDoctor_IdAndQueueDateOrderByArrivedAtAsc(Long doctorId, LocalDate queueDate);
+    @Query("""
+            select q from QueueEntry q
+            where q.doctor.id = :doctorId
+              and q.queueDate = :queueDate
+            order by
+              case
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL then 0
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.HIGH then 1
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.MEDIUM then 2
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.NORMAL then 3
+                else 4
+              end,
+              q.arrivedAt asc,
+              q.id asc
+            """)
+    List<QueueEntry> findCanonicalQueueForDoctor(
+            @Param("doctorId") Long doctorId,
+            @Param("queueDate") LocalDate queueDate);
 
-    List<QueueEntry> findByDoctor_IdAndQueueDateAndStatusOrderByEmergencyTierAscArrivedAtAsc(
-            Long doctorId,
-            LocalDate queueDate,
-            QueueStatus status);
+    @Query("""
+            select q from QueueEntry q
+            where q.doctor.id = :doctorId
+              and q.queueDate = :queueDate
+              and q.status = :status
+            order by
+              case
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL then 0
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.HIGH then 1
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.MEDIUM then 2
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.NORMAL then 3
+                else 4
+              end,
+              q.arrivedAt asc,
+              q.id asc
+            """)
+    List<QueueEntry> findCanonicalQueueForDoctorAndStatus(
+            @Param("doctorId") Long doctorId,
+            @Param("queueDate") LocalDate queueDate,
+            @Param("status") QueueStatus status);
 
-    List<QueueEntry> findByDoctor_IdAndQueueDateAndStatusInOrderByEmergencyTierAscArrivedAtAsc(
-            Long doctorId,
-            LocalDate queueDate,
-            Collection<QueueStatus> statuses);
+    @Query("""
+            select q from QueueEntry q
+            where q.doctor.id = :doctorId
+              and q.queueDate = :queueDate
+              and q.status in :statuses
+            order by
+              case
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL then 0
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.HIGH then 1
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.MEDIUM then 2
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.NORMAL then 3
+                else 4
+              end,
+              q.arrivedAt asc,
+              q.id asc
+            """)
+    List<QueueEntry> findCanonicalQueueForDoctorAndStatuses(
+            @Param("doctorId") Long doctorId,
+            @Param("queueDate") LocalDate queueDate,
+            @Param("statuses") Collection<QueueStatus> statuses);
 
     @Query("select coalesce(max(q.tokenNumber), 0) from QueueEntry q "
             + "where q.doctor.id = :doctorId and q.queueDate = :queueDate")
@@ -45,13 +94,24 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
     Optional<QueueEntry> findByIdForUpdate(@Param("entryId") Long entryId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select q from QueueEntry q "
-            + "join fetch q.doctor "
-            + "join fetch q.appointment "
-            + "where q.doctor.id = :doctorId "
-            + "and q.queueDate = :queueDate "
-            + "and q.status in :statuses "
-            + "order by q.emergencyTier asc, q.arrivedAt asc")
+    @Query("""
+            select q from QueueEntry q
+            join fetch q.doctor
+            join fetch q.appointment
+            where q.doctor.id = :doctorId
+              and q.queueDate = :queueDate
+              and q.status in :statuses
+            order by
+              case
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL then 0
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.HIGH then 1
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.MEDIUM then 2
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.NORMAL then 3
+                else 4
+              end,
+              q.arrivedAt asc,
+              q.id asc
+            """)
     List<QueueEntry> findNextCandidatesForUpdate(
             @Param("doctorId") Long doctorId,
             @Param("queueDate") LocalDate queueDate,

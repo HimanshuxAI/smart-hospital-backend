@@ -110,8 +110,46 @@ public class QueueEntry {
         updatedAt = Instant.now();
     }
 
-    public void transitionTo(QueueStatus newStatus) {
-        status = Objects.requireNonNull(newStatus, "newStatus must not be null");
+    public void call(Instant calledAt) {
+        requireStatus(QueueStatus.WAITING, "call");
+        this.calledAt = Objects.requireNonNull(calledAt, "calledAt must not be null");
+        this.status = QueueStatus.CALLED;
+    }
+
+    public void startConsultation(Instant servedAt) {
+        requireStatus(QueueStatus.CALLED, "start consultation");
+        this.servedAt = Objects.requireNonNull(servedAt, "servedAt must not be null");
+        this.status = QueueStatus.IN_CONSULTATION;
+    }
+
+    public void complete(Instant completedAt) {
+        requireStatus(QueueStatus.IN_CONSULTATION, "complete");
+        this.completedAt = Objects.requireNonNull(completedAt, "completedAt must not be null");
+        this.status = QueueStatus.COMPLETED;
+    }
+
+    public void skip() {
+        requireStatus(QueueStatus.WAITING, "skip");
+        this.status = QueueStatus.SKIPPED;
+    }
+
+    public void returnToWaiting() {
+        requireStatus(QueueStatus.SKIPPED, "return to waiting");
+        this.status = QueueStatus.WAITING;
+    }
+
+    public void cancel() {
+        if (status != QueueStatus.WAITING && status != QueueStatus.CALLED) {
+            throw new IllegalStateException("cannot cancel queue entry in status " + status);
+        }
+        this.status = QueueStatus.CANCELLED;
+    }
+
+    private void requireStatus(QueueStatus requiredStatus, String operation) {
+        if (status != requiredStatus) {
+            throw new IllegalStateException(
+                    "cannot " + operation + " queue entry in status " + status);
+        }
     }
 
     public void classify(EmergencyTier newTier) {
@@ -154,24 +192,12 @@ public class QueueEntry {
         return calledAt;
     }
 
-    public void setCalledAt(Instant calledAt) {
-        this.calledAt = calledAt;
-    }
-
     public Instant getServedAt() {
         return servedAt;
     }
 
-    public void setServedAt(Instant servedAt) {
-        this.servedAt = servedAt;
-    }
-
     public Instant getCompletedAt() {
         return completedAt;
-    }
-
-    public void setCompletedAt(Instant completedAt) {
-        this.completedAt = completedAt;
     }
 
     public long getVersion() {

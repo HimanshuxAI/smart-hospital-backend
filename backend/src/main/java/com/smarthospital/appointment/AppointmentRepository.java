@@ -1,6 +1,7 @@
 package com.smarthospital.appointment;
 
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,22 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             Long doctorId,
             LocalDate startsAt,
             LocalDate endsAt);
+
+    @Query("""
+            select a from Appointment a
+            join a.slot s
+            where a.patient.id = :patientId
+              and a.status in (
+                  com.smarthospital.appointment.AppointmentStatus.BOOKED,
+                  com.smarthospital.appointment.AppointmentStatus.CHECKED_IN)
+              and s.startsAt < :proposedEnd
+              and s.endsAt > :proposedStart
+            order by s.startsAt asc, a.id asc
+            """)
+    List<Appointment> findActiveOverlappingForPatient(
+            @Param("patientId") Long patientId,
+            @Param("proposedStart") Instant proposedStart,
+            @Param("proposedEnd") Instant proposedEnd);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Appointment a "

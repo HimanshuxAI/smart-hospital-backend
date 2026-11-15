@@ -41,6 +41,9 @@ public class ScheduleSlot {
     @Column(name = "status", nullable = false, length = 20)
     private ScheduleSlotStatus status;
 
+    @Column(name = "reason_label", length = 255)
+    private String reasonLabel;
+
     @Column(name = "active", nullable = false)
     private boolean active;
 
@@ -54,9 +57,14 @@ public class ScheduleSlot {
     }
 
     public ScheduleSlot(DoctorProfile doctor, Instant startsAt, Instant endsAt) {
+        this(doctor, startsAt, endsAt, null);
+    }
+
+    public ScheduleSlot(DoctorProfile doctor, Instant startsAt, Instant endsAt, String reasonLabel) {
         this.doctor = Objects.requireNonNull(doctor, "doctor must not be null");
         this.startsAt = Objects.requireNonNull(startsAt, "startsAt must not be null");
         this.endsAt = Objects.requireNonNull(endsAt, "endsAt must not be null");
+        this.reasonLabel = reasonLabel;
         this.status = ScheduleSlotStatus.OPEN;
         this.active = true;
     }
@@ -91,6 +99,14 @@ public class ScheduleSlot {
 
     public ScheduleSlotStatus getStatus() {
         return status;
+    }
+
+    public String getReasonLabel() {
+        return reasonLabel;
+    }
+
+    public void setReasonLabel(String reasonLabel) {
+        this.reasonLabel = reasonLabel;
     }
 
     public void setStatus(ScheduleSlotStatus status) {

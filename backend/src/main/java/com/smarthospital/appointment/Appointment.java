@@ -61,6 +61,15 @@ public class Appointment {
     @Column(name = "version", nullable = false)
     private long version;
 
+    @Column(name = "checked_in_at")
+    private Instant checkedInAt;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
+
+    @Column(name = "no_show_at")
+    private Instant noShowAt;
+
     @Column(name = "cancelled_at")
     private Instant cancelledAt;
 
@@ -107,19 +116,48 @@ public class Appointment {
         updatedAt = Instant.now();
     }
 
-    public void transitionTo(AppointmentStatus newStatus) {
-        status = Objects.requireNonNull(newStatus, "newStatus must not be null");
-        activeMarker = switch (newStatus) {
-            case BOOKED, CHECKED_IN -> 1;
-            case COMPLETED, CANCELLED, NO_SHOW -> null;
-        };
+    public void checkIn(Instant checkedInAt) {
+        requireStatus(AppointmentStatus.BOOKED, "check in");
+        Instant validatedCheckedInAt = Objects.requireNonNull(checkedInAt, "checkedInAt must not be null");
+        this.checkedInAt = validatedCheckedInAt;
+        this.status = AppointmentStatus.CHECKED_IN;
+        this.activeMarker = 1;
     }
 
-    public void markCancelled(User actor, String reason, Instant cancelledAt) {
-        transitionTo(AppointmentStatus.CANCELLED);
-        this.cancelledBy = actor;
-        this.cancellationReason = Objects.requireNonNull(reason, "reason must not be null");
-        this.cancelledAt = Objects.requireNonNull(cancelledAt, "cancelledAt must not be null");
+    public void cancel(User actor, String reason, Instant cancelledAt) {
+        requireStatus(AppointmentStatus.BOOKED, "cancel");
+        User validatedActor = Objects.requireNonNull(actor, "actor must not be null");
+        String validatedReason = Objects.requireNonNull(reason, "reason must not be null");
+        if (validatedReason.isBlank()) {
+            throw new IllegalArgumentException("reason must not be blank");
+        }
+        Instant validatedCancelledAt = Objects.requireNonNull(cancelledAt, "cancelledAt must not be null");
+        this.cancelledBy = validatedActor;
+        this.cancellationReason = validatedReason;
+        this.cancelledAt = validatedCancelledAt;
+        this.status = AppointmentStatus.CANCELLED;
+        this.activeMarker = null;
+    }
+
+    public void markNoShow(Instant noShowAt) {
+        requireStatus(AppointmentStatus.BOOKED, "mark no-show");
+        this.noShowAt = Objects.requireNonNull(noShowAt, "noShowAt must not be null");
+        this.status = AppointmentStatus.NO_SHOW;
+        this.activeMarker = null;
+    }
+
+    public void complete(Instant completedAt) {
+        requireStatus(AppointmentStatus.CHECKED_IN, "complete");
+        this.completedAt = Objects.requireNonNull(completedAt, "completedAt must not be null");
+        this.status = AppointmentStatus.COMPLETED;
+        this.activeMarker = null;
+    }
+
+    private void requireStatus(AppointmentStatus requiredStatus, String operation) {
+        if (status != requiredStatus) {
+            throw new IllegalStateException(
+                    "cannot " + operation + " appointment in status " + status);
+        }
     }
 
     public Long getId() {
@@ -160,6 +198,18 @@ public class Appointment {
 
     public long getVersion() {
         return version;
+    }
+
+    public Instant getCheckedInAt() {
+        return checkedInAt;
+    }
+
+    public Instant getCompletedAt() {
+        return completedAt;
+    }
+
+    public Instant getNoShowAt() {
+        return noShowAt;
     }
 
     public Instant getCancelledAt() {
