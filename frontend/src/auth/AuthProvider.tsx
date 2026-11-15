@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 
-import type { AppAdapter } from "../api/adapter";
+import type { AuthAdapter } from "../api/adapter";
 import { createTokenStore, type TokenStore } from "../api/token-store";
 import type {
   AuthUser,
@@ -17,7 +17,7 @@ import type {
 import { AuthContext, type AuthContextValue, type AuthStatus } from "./auth-context";
 
 type AuthProviderProps = {
-  adapter: AppAdapter;
+  adapter: AuthAdapter;
   tokenStore?: TokenStore;
   children: ReactNode;
 };
