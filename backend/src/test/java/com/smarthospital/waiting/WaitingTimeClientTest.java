@@ -27,6 +27,16 @@ class WaitingTimeClientTest {
             2,
             20);
 
+    private static final String VALID_PREDICTION_JSON = """
+            {
+              "estimatedWaitMinutes": 42,
+              "confidence": 0.91,
+              "modelVersion": "waiting-time-rf-v1",
+              "featureSchemaVersion": 1,
+              "trainingDataProvenance": "synthetic-demo-data"
+            }
+            """;
+
     private MockRestServiceServer server;
     private WaitingTimeClient client;
 
@@ -42,17 +52,7 @@ class WaitingTimeClientTest {
     void successfulPredictionIsReturnedWithMlMetadata() {
         server.expect(requestTo("http://ml.test/predict"))
                 .andExpect(method(HttpMethod.POST))
-                .andRespond(withSuccess(
-                        """
-                        {
-                          "estimatedWaitMinutes": 42,
-                          "confidence": 0.91,
-                          "modelVersion": "waiting-time-rf-v1",
-                          "featureSchemaVersion": 1,
-                          "trainingDataProvenance": "synthetic-demo-data"
-                        }
-                        """,
-                        MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(VALID_PREDICTION_JSON, MediaType.APPLICATION_JSON));
 
         var prediction = client.predict(FEATURES);
 
@@ -71,6 +71,18 @@ class WaitingTimeClientTest {
     void nonSuccessStatusReturnsNoPrediction() {
         server.expect(requestTo("http://ml.test/predict"))
                 .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void redirectStatusWithValidPredictionBodyReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withStatus(HttpStatus.FOUND)
+                        .header("Location", "/other")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(VALID_PREDICTION_JSON));
 
         assertThat(client.predict(FEATURES)).isEmpty();
         server.verify();
@@ -98,6 +110,139 @@ class WaitingTimeClientTest {
                           "modelVersion": "",
                           "featureSchemaVersion": 0,
                           "trainingDataProvenance": ""
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void missingRequiredFieldReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "confidence": 0.91,
+                          "modelVersion": "waiting-time-rf-v1",
+                          "featureSchemaVersion": 1,
+                          "trainingDataProvenance": "synthetic-demo-data"
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void numericStringEstimatedWaitMinutesReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "estimatedWaitMinutes": "42",
+                          "confidence": 0.91,
+                          "modelVersion": "waiting-time-rf-v1",
+                          "featureSchemaVersion": 1,
+                          "trainingDataProvenance": "synthetic-demo-data"
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void fractionalEstimatedWaitMinutesReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "estimatedWaitMinutes": 42.9,
+                          "confidence": 0.91,
+                          "modelVersion": "waiting-time-rf-v1",
+                          "featureSchemaVersion": 1,
+                          "trainingDataProvenance": "synthetic-demo-data"
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void numericStringFeatureSchemaVersionReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "estimatedWaitMinutes": 42,
+                          "confidence": 0.91,
+                          "modelVersion": "waiting-time-rf-v1",
+                          "featureSchemaVersion": "1",
+                          "trainingDataProvenance": "synthetic-demo-data"
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void fractionalFeatureSchemaVersionReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "estimatedWaitMinutes": 42,
+                          "confidence": 0.91,
+                          "modelVersion": "waiting-time-rf-v1",
+                          "featureSchemaVersion": 1.5,
+                          "trainingDataProvenance": "synthetic-demo-data"
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void numericStringConfidenceReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "estimatedWaitMinutes": 42,
+                          "confidence": "0.91",
+                          "modelVersion": "waiting-time-rf-v1",
+                          "featureSchemaVersion": 1,
+                          "trainingDataProvenance": "synthetic-demo-data"
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        assertThat(client.predict(FEATURES)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void extraResponseFieldReturnsNoPrediction() {
+        server.expect(requestTo("http://ml.test/predict"))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "estimatedWaitMinutes": 42,
+                          "confidence": 0.91,
+                          "modelVersion": "waiting-time-rf-v1",
+                          "featureSchemaVersion": 1,
+                          "trainingDataProvenance": "synthetic-demo-data",
+                          "unexpected": true
                         }
                         """,
                         MediaType.APPLICATION_JSON));

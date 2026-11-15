@@ -1,11 +1,20 @@
 package com.smarthospital.waiting;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
@@ -13,6 +22,18 @@ import org.springframework.web.client.RestClientException;
 public class WaitingTimeClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitingTimeClient.class);
+
+    private static final ObjectMapper STRICT_JSON = JsonMapper.builder()
+            .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+            .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+            .build();
+
+    private static final Set<String> REQUIRED_RESPONSE_FIELDS = Set.of(
+            "estimatedWaitMinutes",
+            "confidence",
+            "modelVersion",
+            "featureSchemaVersion",
+            "trainingDataProvenance");
 
     private final RestClient restClient;
 
@@ -22,23 +43,30 @@ public class WaitingTimeClient {
 
     public Optional<WaitingTimePrediction> predict(WaitingTimeFeatures features) {
         try {
-            MlPredictionPayload payload = restClient.post()
+            String responseBody = restClient.post()
                     .uri("/predict")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(features)
                     .retrieve()
-                    .body(MlPredictionPayload.class);
-            if (!isValid(payload)) {
+                    .onStatus(
+                            status -> !status.is2xxSuccessful(),
+                            (request, response) -> {
+                                throw new HttpClientErrorException(response.getStatusCode());
+                            })
+                    .body(String.class);
+            Optional<MlPredictionPayload> payload = parseStrict(responseBody);
+            if (payload.isEmpty()) {
                 LOGGER.warn("ML service returned an invalid waiting-time prediction");
                 return Optional.empty();
             }
+            MlPredictionPayload parsed = payload.orElseThrow();
             return Optional.of(new WaitingTimePrediction(
-                    payload.estimatedWaitMinutes(),
+                    parsed.estimatedWaitMinutes(),
                     PredictionSource.ML,
-                    payload.confidence(),
-                    payload.modelVersion(),
-                    payload.featureSchemaVersion(),
-                    payload.trainingDataProvenance()));
+                    parsed.confidence(),
+                    parsed.modelVersion(),
+                    parsed.featureSchemaVersion(),
+                    parsed.trainingDataProvenance()));
         } catch (RestClientException | IllegalArgumentException exception) {
             LOGGER.warn("ML waiting-time prediction unavailable: {}",
                     exception.getClass().getSimpleName());
@@ -46,30 +74,72 @@ public class WaitingTimeClient {
         }
     }
 
-    private static boolean isValid(MlPredictionPayload payload) {
-        if (payload == null
-                || payload.estimatedWaitMinutes() == null
-                || payload.estimatedWaitMinutes() < 0
-                || payload.confidence() == null
-                || !Double.isFinite(payload.confidence())
-                || payload.confidence() < 0.0
-                || payload.confidence() > 1.0
-                || payload.modelVersion() == null
-                || payload.modelVersion().isBlank()
-                || payload.featureSchemaVersion() == null
-                || payload.featureSchemaVersion() < 1
-                || payload.trainingDataProvenance() == null
-                || payload.trainingDataProvenance().isBlank()) {
-            return false;
+    private static Optional<MlPredictionPayload> parseStrict(String responseBody) {
+        if (responseBody == null || responseBody.isBlank()) {
+            return Optional.empty();
         }
-        return true;
+
+        try {
+            JsonNode root = STRICT_JSON.readTree(responseBody);
+            if (root == null || !root.isObject()) {
+                return Optional.empty();
+            }
+
+            Set<String> responseFields = new HashSet<>();
+            root.fieldNames().forEachRemaining(responseFields::add);
+            if (!responseFields.equals(REQUIRED_RESPONSE_FIELDS)) {
+                return Optional.empty();
+            }
+
+            JsonNode estimatedWaitMinutes = root.get("estimatedWaitMinutes");
+            if (!estimatedWaitMinutes.isIntegralNumber()
+                    || !estimatedWaitMinutes.canConvertToInt()
+                    || estimatedWaitMinutes.intValue() < 0) {
+                return Optional.empty();
+            }
+
+            JsonNode confidence = root.get("confidence");
+            if (!confidence.isNumber()
+                    || !Double.isFinite(confidence.doubleValue())
+                    || confidence.doubleValue() < 0.0
+                    || confidence.doubleValue() > 1.0) {
+                return Optional.empty();
+            }
+
+            JsonNode modelVersion = root.get("modelVersion");
+            if (!modelVersion.isTextual() || modelVersion.textValue().isBlank()) {
+                return Optional.empty();
+            }
+
+            JsonNode featureSchemaVersion = root.get("featureSchemaVersion");
+            if (!featureSchemaVersion.isIntegralNumber()
+                    || !featureSchemaVersion.canConvertToInt()
+                    || featureSchemaVersion.intValue() < 1) {
+                return Optional.empty();
+            }
+
+            JsonNode trainingDataProvenance = root.get("trainingDataProvenance");
+            if (!trainingDataProvenance.isTextual()
+                    || trainingDataProvenance.textValue().isBlank()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(new MlPredictionPayload(
+                    estimatedWaitMinutes.intValue(),
+                    confidence.doubleValue(),
+                    modelVersion.textValue(),
+                    featureSchemaVersion.intValue(),
+                    trainingDataProvenance.textValue()));
+        } catch (JsonProcessingException exception) {
+            return Optional.empty();
+        }
     }
 
     private record MlPredictionPayload(
-            Integer estimatedWaitMinutes,
-            Double confidence,
+            int estimatedWaitMinutes,
+            double confidence,
             String modelVersion,
-            Integer featureSchemaVersion,
+            int featureSchemaVersion,
             String trainingDataProvenance) {
     }
 }
