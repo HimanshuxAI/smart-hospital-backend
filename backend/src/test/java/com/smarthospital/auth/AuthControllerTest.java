@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,7 +42,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
     void registrationReturnsExactTokenBundleShapeWithoutSensitiveFields() throws Exception {
         String email = uniqueEmail();
 
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/register")
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/register").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(registration(email))))
                 .andExpect(status().isOk())
@@ -69,7 +70,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
         request.put("role", "DOCTOR");
         request.put("licenseNumber", "UNTRUSTED-LICENSE");
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
@@ -84,7 +85,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
         String email = uniqueEmail();
         register(email);
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(registration(email.toUpperCase()))))
                 .andExpect(status().isConflict())
@@ -105,7 +106,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
         Map<String, Object> request = new LinkedHashMap<>(registration(uniqueEmail()));
         request.put("email", "not-an-email");
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
@@ -118,7 +119,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
 
     @Test
     void malformedJsonReturnsProblemDetails() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{not-json"))
                 .andExpect(status().isBadRequest())
@@ -133,7 +134,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
         String email = uniqueEmail();
         register(email);
 
-        MvcResult wrongPassword = mockMvc.perform(post("/api/v1/auth/login")
+        MvcResult wrongPassword = mockMvc.perform(post("/api/v1/auth/login").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "email", email,
@@ -142,7 +143,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
                 .andReturn();
-        MvcResult unknownEmail = mockMvc.perform(post("/api/v1/auth/login")
+        MvcResult unknownEmail = mockMvc.perform(post("/api/v1/auth/login").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "email", uniqueEmail(),
@@ -163,7 +164,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
     void refreshRotatesTokenAndReturnsANewBundle() throws Exception {
         JsonNode original = register(uniqueEmail());
 
-        mockMvc.perform(post("/api/v1/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "refreshToken", original.get("refreshToken").asText()))))
@@ -194,7 +195,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
                                 "refreshToken", bundle.get("refreshToken").asText()))))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(post("/api/v1/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "refreshToken", bundle.get("refreshToken").asText()))))
@@ -216,7 +217,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.code").value("INVALID_REFRESH_TOKEN"));
 
-        mockMvc.perform(post("/api/v1/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "refreshToken", secondUser.get("refreshToken").asText()))))
@@ -242,7 +243,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
 
     @Test
     void unsupportedRequestMediaTypeReturnsProblemDetails() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_XML)
                         .content("<login/>"))
                 .andExpect(status().isUnsupportedMediaType())
@@ -252,7 +253,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
 
     @Test
     void unsupportedResponseMediaTypeReturnsProblemDetails() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register").with(uniqueRemoteAddress())
                         .accept(MediaType.APPLICATION_XML)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(registration(uniqueEmail()))))
@@ -338,7 +339,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
         user.setActive(false);
         userRepository.saveAndFlush(user);
 
-        mockMvc.perform(post("/api/v1/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "email", email,
@@ -346,7 +347,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCOUNT_INACTIVE"));
 
-        mockMvc.perform(post("/api/v1/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "refreshToken", bundle.get("refreshToken").asText()))))
@@ -355,7 +356,7 @@ class AuthControllerTest extends MySqlIntegrationTest {
     }
 
     private JsonNode register(String email) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/register")
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/register").with(uniqueRemoteAddress())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(registration(email))))
                 .andExpect(status().isOk())
@@ -374,6 +375,13 @@ class AuthControllerTest extends MySqlIntegrationTest {
         request.put("address", "100 Test Street");
         request.put("emergencyContact", "Emergency Contact +1-555-0199");
         return request;
+    }
+
+    private static RequestPostProcessor uniqueRemoteAddress() {
+        return request -> {
+            request.setRemoteAddr(UUID.randomUUID().toString());
+            return request;
+        };
     }
 
     private static String uniqueEmail() {

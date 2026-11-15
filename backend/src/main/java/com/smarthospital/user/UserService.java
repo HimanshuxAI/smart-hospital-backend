@@ -1,5 +1,7 @@
 package com.smarthospital.user;
 
+import com.smarthospital.auth.RefreshToken;
+import com.smarthospital.auth.RefreshTokenRepository;
 import com.smarthospital.common.ApiException;
 import com.smarthospital.department.Department;
 import com.smarthospital.department.DepartmentRepository;
@@ -8,6 +10,8 @@ import com.smarthospital.doctor.DoctorProfileRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -27,20 +31,26 @@ public class UserService {
     private final UserRepository userRepository;
     private final DoctorProfileRepository doctorProfileRepository;
     private final DepartmentRepository departmentRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final Validator validator;
+    private final Clock clock;
 
     public UserService(
             UserRepository userRepository,
             DoctorProfileRepository doctorProfileRepository,
             DepartmentRepository departmentRepository,
+            RefreshTokenRepository refreshTokenRepository,
             PasswordEncoder passwordEncoder,
-            Validator validator) {
+            Validator validator,
+            Clock clock) {
         this.userRepository = userRepository;
         this.doctorProfileRepository = doctorProfileRepository;
         this.departmentRepository = departmentRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.validator = validator;
+        this.clock = clock;
     }
 
     @Transactional
@@ -103,9 +113,32 @@ public class UserService {
 
     @Transactional
     public AdminUserResponse setActivation(Long userId, boolean active) {
-        User user = findUser(userId);
-        user.setActive(active);
-        return toUserResponse(userRepository.saveAndFlush(user));
+        User targetIdentity = findUser(userId);
+        if (!active && targetIdentity.isActive()) {
+            if (targetIdentity.getRole() == UserRole.ADMIN) {
+                List<User> administrators = userRepository.findAdministratorsForUpdate();
+                User target = findUserForUpdate(userId);
+                long activeAdministratorCount = administrators.stream()
+                        .filter(User::isActive)
+                        .count();
+                if (target.isActive() && activeAdministratorCount <= 1) {
+                    throw lastActiveAdministrator();
+                }
+                deactivateAndRevoke(target);
+            } else {
+                User target = findUserForUpdate(userId);
+                if (target.isActive()) {
+                    deactivateAndRevoke(target);
+                }
+            }
+            return toUserResponse(findUser(userId));
+        }
+
+        User target = findUserForUpdate(userId);
+        if (active) {
+            target.reactivate();
+        }
+        return toUserResponse(userRepository.saveAndFlush(target));
     }
 
     @Transactional(readOnly = true)
@@ -195,6 +228,28 @@ public class UserService {
                         HttpStatus.NOT_FOUND,
                         "USER_NOT_FOUND",
                         "User was not found"));
+    }
+
+    private User findUserForUpdate(Long userId) {
+        return userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        "USER_NOT_FOUND",
+                        "User was not found"));
+    }
+
+    private void deactivateAndRevoke(User target) {
+        target.deactivate();
+        userRepository.saveAndFlush(target);
+
+        List<RefreshToken> refreshTokens = refreshTokenRepository.findByUserIdForUpdate(target.getId());
+        Instant revokedAt = clock.instant();
+        for (RefreshToken token : refreshTokens) {
+            if (token.getRevokedAt() == null) {
+                token.revoke(revokedAt);
+            }
+        }
+        refreshTokenRepository.flush();
     }
 
     private DoctorProfile findDoctorProfile(Long doctorProfileId) {
@@ -293,6 +348,13 @@ public class UserService {
                 HttpStatus.FORBIDDEN,
                 "FORBIDDEN",
                 "Access is denied");
+    }
+
+    private static ApiException lastActiveAdministrator() {
+        return new ApiException(
+                HttpStatus.CONFLICT,
+                "LAST_ACTIVE_ADMIN",
+                "At least one active administrator is required");
     }
 
     private static String normalizeEmail(String email) {

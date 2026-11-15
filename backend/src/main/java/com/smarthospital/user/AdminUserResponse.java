@@ -7,4 +7,10 @@ public record AdminUserResponse(
         UserRole role,
         boolean active,
         String phone) {
+
+    @Override
+    public String toString() {
+        return "AdminUserResponse[id=" + id + ", role=" + role + ", active=" + active
+                + ", details=REDACTED]";
+    }
 }
