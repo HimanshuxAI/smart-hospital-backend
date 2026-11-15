@@ -70,5 +70,5 @@ smart-hospital:
       expiration: "${JWT_REFRESH_TOKEN_EXPIRATION:P7D}"
   ml:
     base-url: "${ML_SERVICE_BASE_URL:http://localhost:8000}"
-    connect-timeout: "${ML_SERVICE_CONNECT_TIMEOUT:2s}"
-    read-timeout: "${ML_SERVICE_READ_TIMEOUT:5s}"
+    connect-timeout: "${ML_SERVICE_CONNECT_TIMEOUT:750ms}"
+    read-timeout: "${ML_SERVICE_READ_TIMEOUT:750ms}"
