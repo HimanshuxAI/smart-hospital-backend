@@ -23,7 +23,8 @@ class MigrationSmokeTest extends MySqlIntegrationTest {
             "queue_entries",
             "queue_audits",
             "refresh_tokens",
-            "waiting_time_samples");
+            "waiting_time_samples",
+            "seed_locks");
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -39,9 +40,34 @@ class MigrationSmokeTest extends MySqlIntegrationTest {
                 Integer.class);
         assertThat(successfulVersionOneMigrations).isEqualTo(1);
 
+        Integer successfulVersionTwoMigrations = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '2' AND success = 1",
+                Integer.class);
+        assertThat(successfulVersionTwoMigrations).isEqualTo(1);
+
         for (String table : REQUIRED_TABLES) {
             assertThat(tableExists(table)).as("required table %s", table).isTrue();
         }
+    }
+
+    @Test
+    void forwardMigrationAddsPersistenceHardeningColumnsAndRetainsAuditHistory() {
+        assertThat(columnExists("schedule_slots", "reason_label")).isTrue();
+        assertThat(columnExists("appointments", "checked_in_at")).isTrue();
+        assertThat(columnExists("appointments", "completed_at")).isTrue();
+        assertThat(columnExists("appointments", "no_show_at")).isTrue();
+
+        String deleteRule = jdbcTemplate.queryForObject(
+                "SELECT delete_rule FROM information_schema.referential_constraints "
+                        + "WHERE constraint_schema = DATABASE() "
+                        + "AND constraint_name = 'fk_queue_audits_entry'",
+                String.class);
+        assertThat(deleteRule).isEqualTo("RESTRICT");
+
+        Integer seedLockRows = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM seed_locks WHERE id = 1",
+                Integer.class);
+        assertThat(seedLockRows).isEqualTo(1);
     }
 
     @Test
@@ -74,6 +100,17 @@ class MigrationSmokeTest extends MySqlIntegrationTest {
                 "idx_appointments_doctor_date",
                 "idx_queue_entries_doctor_date_status",
                 "idx_refresh_tokens_family");
+    }
+
+    private boolean columnExists(String tableName, String columnName) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.columns "
+                        + "WHERE table_schema = DATABASE() "
+                        + "AND table_name = ? AND column_name = ?",
+                Integer.class,
+                tableName,
+                columnName);
+        return count != null && count == 1;
     }
 
     private boolean tableExists(String tableName) {

@@ -37,6 +37,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @SpringBootTest
 class EntityInvariantTest extends MySqlIntegrationTest {
 
+    private static final LocalDate TEST_DATE = LocalDate.of(2030, 1, 15);
+    private static final Instant ARRIVAL_TIME = Instant.parse("2030-01-15T08:00:00Z");
     private static final AtomicInteger SLOT_SEQUENCE = new AtomicInteger();
     private static final AtomicInteger TOKEN_SEQUENCE = new AtomicInteger();
 
@@ -67,27 +69,35 @@ class EntityInvariantTest extends MySqlIntegrationTest {
     @Test
     void appointmentStatusAndActiveMarkerStayAlignedWithMigration() {
         DoctorProfile doctor = persistDoctor();
+        PatientProfile patient = persistPatient();
+        ScheduleSlot slot = persistSlot(doctor);
         Appointment appointment = new Appointment(
-                persistPatient(),
+                patient,
                 doctor,
-                persistSlot(doctor),
-                LocalDate.now(),
+                slot,
+                TEST_DATE,
                 "Synthetic visit reason");
 
         assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.BOOKED);
         assertThat(appointment.getActiveMarker()).isEqualTo(1);
 
-        appointment.transitionTo(AppointmentStatus.CHECKED_IN);
+        appointment.checkIn(Instant.parse("2030-01-15T08:00:00Z"));
+        assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.CHECKED_IN);
         assertThat(appointment.getActiveMarker()).isEqualTo(1);
 
-        appointment.transitionTo(AppointmentStatus.COMPLETED);
+        appointment.complete(Instant.parse("2030-01-15T08:15:00Z"));
+        assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
         assertThat(appointment.getActiveMarker()).isNull();
 
-        appointment.transitionTo(AppointmentStatus.CANCELLED);
-        assertThat(appointment.getActiveMarker()).isNull();
+        Appointment cancelled = new Appointment(patient, doctor, slot, TEST_DATE, "Synthetic cancellation");
+        cancelled.cancel(persistUser(), "Synthetic cancellation reason", Instant.parse("2030-01-15T08:20:00Z"));
+        assertThat(cancelled.getStatus()).isEqualTo(AppointmentStatus.CANCELLED);
+        assertThat(cancelled.getActiveMarker()).isNull();
 
-        appointment.transitionTo(AppointmentStatus.NO_SHOW);
-        assertThat(appointment.getActiveMarker()).isNull();
+        Appointment noShow = new Appointment(patient, doctor, slot, TEST_DATE, "Synthetic no-show");
+        noShow.markNoShow(Instant.parse("2030-01-15T08:25:00Z"));
+        assertThat(noShow.getStatus()).isEqualTo(AppointmentStatus.NO_SHOW);
+        assertThat(noShow.getActiveMarker()).isNull();
     }
 
     @Test
@@ -97,7 +107,7 @@ class EntityInvariantTest extends MySqlIntegrationTest {
                 persistPatient(),
                 doctor,
                 persistSlot(doctor),
-                LocalDate.now(),
+                TEST_DATE,
                 "Synthetic raw active-marker visit"));
 
         assertThatThrownBy(() -> jdbcTemplate.update(
@@ -120,7 +130,7 @@ class EntityInvariantTest extends MySqlIntegrationTest {
                 persistPatient(),
                 doctor,
                 persistSlot(doctor),
-                LocalDate.now(),
+                TEST_DATE,
                 "Synthetic raw terminal-marker visit"));
 
         assertThatThrownBy(() -> jdbcTemplate.update(
@@ -151,14 +161,14 @@ class EntityInvariantTest extends MySqlIntegrationTest {
                 patient,
                 doctor,
                 slot,
-                LocalDate.now(),
+                TEST_DATE,
                 "Synthetic visit reason"));
 
         assertThatThrownBy(() -> appointmentRepository.saveAndFlush(new Appointment(
                         patient,
                         doctor,
                         slot,
-                        LocalDate.now(),
+                        TEST_DATE,
                         "Synthetic conflicting visit reason")))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
@@ -169,15 +179,15 @@ class EntityInvariantTest extends MySqlIntegrationTest {
         ScheduleSlot slot = persistSlot(doctor);
         PatientProfile patient = persistPatient();
 
-        Appointment active = new Appointment(patient, doctor, slot, LocalDate.now(), "Synthetic active visit");
+        Appointment active = new Appointment(patient, doctor, slot, TEST_DATE, "Synthetic active visit");
         appointmentRepository.saveAndFlush(active);
 
-        Appointment cancelled = new Appointment(patient, doctor, slot, LocalDate.now(), "Synthetic cancelled visit");
-        cancelled.transitionTo(AppointmentStatus.CANCELLED);
+        Appointment cancelled = new Appointment(patient, doctor, slot, TEST_DATE, "Synthetic cancelled visit");
+        cancelled.cancel(persistUser(), "Synthetic cancellation reason", Instant.parse("2030-01-15T08:20:00Z"));
         appointmentRepository.saveAndFlush(cancelled);
 
-        Appointment noShow = new Appointment(patient, doctor, slot, LocalDate.now(), "Synthetic no-show visit");
-        noShow.transitionTo(AppointmentStatus.NO_SHOW);
+        Appointment noShow = new Appointment(patient, doctor, slot, TEST_DATE, "Synthetic no-show visit");
+        noShow.markNoShow(Instant.parse("2030-01-15T08:25:00Z"));
         appointmentRepository.saveAndFlush(noShow);
 
         Integer appointmentCount = jdbcTemplate.queryForObject(
@@ -196,7 +206,7 @@ class EntityInvariantTest extends MySqlIntegrationTest {
     void queueLookupOrdersCriticalEntriesBeforeNormalEntries() {
         DoctorProfile doctor = persistDoctor();
         PatientProfile patient = persistPatient();
-        LocalDate queueDate = LocalDate.now();
+        LocalDate queueDate = TEST_DATE;
         List<EmergencyTier> insertedTiers = List.of(
                 EmergencyTier.NORMAL,
                 EmergencyTier.CRITICAL,
@@ -217,11 +227,11 @@ class EntityInvariantTest extends MySqlIntegrationTest {
                     queueDate,
                     nextToken(),
                     tier,
-                    Instant.now()));
+                    ARRIVAL_TIME));
         }
 
         List<QueueEntry> ordered = queueEntryRepository
-                .findByDoctor_IdAndQueueDateAndStatusOrderByEmergencyTierAscArrivedAtAsc(
+                .findCanonicalQueueForDoctorAndStatus(
                         doctor.getId(),
                         queueDate,
                         QueueStatus.WAITING);
@@ -237,7 +247,7 @@ class EntityInvariantTest extends MySqlIntegrationTest {
     void onlyOneQueueEntryCanBeInConsultationForADoctor() {
         DoctorProfile doctor = persistDoctor();
         PatientProfile patient = persistPatient();
-        LocalDate queueDate = LocalDate.now();
+        LocalDate queueDate = TEST_DATE;
 
         QueueEntry first = new QueueEntry(
                 appointmentRepository.saveAndFlush(new Appointment(
@@ -250,8 +260,9 @@ class EntityInvariantTest extends MySqlIntegrationTest {
                 queueDate,
                 nextToken(),
                 EmergencyTier.NORMAL,
-                Instant.now());
-        first.transitionTo(QueueStatus.IN_CONSULTATION);
+                ARRIVAL_TIME);
+        first.call(Instant.parse("2030-01-15T08:00:00Z"));
+        first.startConsultation(Instant.parse("2030-01-15T08:05:00Z"));
         queueEntryRepository.saveAndFlush(first);
 
         QueueEntry second = new QueueEntry(
@@ -265,8 +276,9 @@ class EntityInvariantTest extends MySqlIntegrationTest {
                 queueDate,
                 nextToken(),
                 EmergencyTier.NORMAL,
-                Instant.now());
-        second.transitionTo(QueueStatus.IN_CONSULTATION);
+                ARRIVAL_TIME);
+        second.call(Instant.parse("2030-01-15T08:10:00Z"));
+        second.startConsultation(Instant.parse("2030-01-15T08:15:00Z"));
 
         assertThatThrownBy(() -> queueEntryRepository.saveAndFlush(second))
                 .isInstanceOf(DataIntegrityViolationException.class);
@@ -280,15 +292,15 @@ class EntityInvariantTest extends MySqlIntegrationTest {
                 patient,
                 doctor,
                 persistSlot(doctor),
-                LocalDate.now(),
+                TEST_DATE,
                 "Synthetic audit visit"));
         QueueEntry queueEntry = queueEntryRepository.saveAndFlush(new QueueEntry(
                 appointment,
                 doctor,
-                LocalDate.now(),
+                TEST_DATE,
                 nextToken(),
                 EmergencyTier.NORMAL,
-                Instant.now()));
+                ARRIVAL_TIME));
         User actor = persistUser();
 
         assertThatThrownBy(() -> new QueueAudit(

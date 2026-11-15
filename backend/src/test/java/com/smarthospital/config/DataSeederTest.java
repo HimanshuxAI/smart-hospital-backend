@@ -14,8 +14,10 @@ import com.smarthospital.schedule.ScheduleSlotStatus;
 import com.smarthospital.user.User;
 import com.smarthospital.user.UserRepository;
 import com.smarthospital.user.UserRole;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +28,19 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(properties = "app.seed.enabled=true")
+@SpringBootTest(properties = {
+        "app.seed.enabled=true",
+        "smart-hospital.time-zone=Asia/Kolkata"
+})
 class DataSeederTest extends MySqlIntegrationTest {
+
+    private static final LocalDate SEED_DATE = LocalDate.of(2030, 1, 15);
+    private static final ZoneId HOSPITAL_ZONE = ZoneId.of("Asia/Kolkata");
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -53,6 +62,12 @@ class DataSeederTest extends MySqlIntegrationTest {
 
     @Autowired
     private ObjectProvider<PasswordEncoder> passwordEncoderProvider;
+
+    @Autowired
+    private ZoneId hospitalZoneId;
+
+    @TestBean(name = "clock", methodName = "fixedClock")
+    private Clock clock;
 
     @Test
     @Transactional
@@ -90,14 +105,21 @@ class DataSeederTest extends MySqlIntegrationTest {
         assertThat(departmentRepository.findByNameIgnoreCase("General Medicine")).isPresent();
         assertThat(departmentRepository.findByNameIgnoreCase("Cardiology")).isPresent();
 
-        LocalDate todayUtc = LocalDate.now(ZoneOffset.UTC);
-        List<ScheduleSlot> todaySlots = slotsFor(doctor.getId(), todayUtc);
-        List<ScheduleSlot> tomorrowSlots = slotsFor(doctor.getId(), todayUtc.plusDays(1));
-        assertThat(todaySlots).hasSizeGreaterThanOrEqualTo(2);
-        assertThat(tomorrowSlots).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(hospitalZoneId).isEqualTo(HOSPITAL_ZONE);
+        List<ScheduleSlot> todaySlots = slotsFor(doctor.getId(), SEED_DATE);
+        List<ScheduleSlot> tomorrowSlots = slotsFor(doctor.getId(), SEED_DATE.plusDays(1));
+        assertThat(todaySlots)
+                .extracting(ScheduleSlot::getStartsAt)
+                .containsExactly(
+                        Instant.parse("2030-01-15T03:30:00Z"),
+                        Instant.parse("2030-01-15T04:30:00Z"));
+        assertThat(tomorrowSlots)
+                .extracting(ScheduleSlot::getStartsAt)
+                .containsExactly(
+                        Instant.parse("2030-01-16T03:30:00Z"),
+                        Instant.parse("2030-01-16T04:30:00Z"));
         assertThat(todaySlots).allMatch(slot -> slot.getStatus() == ScheduleSlotStatus.OPEN && slot.isActive());
         assertThat(tomorrowSlots).allMatch(slot -> slot.getStatus() == ScheduleSlotStatus.OPEN && slot.isActive());
-        assertThat(tomorrowSlots.get(0).getStartsAt()).isAfter(Instant.now());
 
         long userCount = userRepository.count();
         long patientProfileCount = patientProfileRepository.count();
@@ -116,13 +138,16 @@ class DataSeederTest extends MySqlIntegrationTest {
     }
 
     private List<ScheduleSlot> slotsFor(Long doctorId, LocalDate date) {
-        Instant start = date.atStartOfDay().toInstant(ZoneOffset.UTC);
-        Instant end = date.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        return scheduleSlotRepository
-                .findByDoctor_IdAndStartsAtBetweenAndStatusAndActiveTrueOrderByStartsAtAsc(
-                        doctorId,
-                        start,
-                        end,
-                        ScheduleSlotStatus.OPEN);
+        Instant start = date.atStartOfDay(HOSPITAL_ZONE).toInstant();
+        Instant end = date.plusDays(1).atStartOfDay(HOSPITAL_ZONE).toInstant();
+        return scheduleSlotRepository.findActiveByDoctorAndStartsAtRange(
+                doctorId,
+                start,
+                end,
+                ScheduleSlotStatus.OPEN);
+    }
+
+    static Clock fixedClock() {
+        return Clock.fixed(Instant.parse("2030-01-15T00:00:00Z"), ZoneOffset.UTC);
     }
 }

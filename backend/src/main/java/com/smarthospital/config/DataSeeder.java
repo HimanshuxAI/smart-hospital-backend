@@ -11,13 +11,15 @@ import com.smarthospital.schedule.ScheduleSlotRepository;
 import com.smarthospital.user.User;
 import com.smarthospital.user.UserRepository;
 import com.smarthospital.user.UserRole;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +38,10 @@ public class DataSeeder implements ApplicationRunner {
     private final DepartmentRepository departmentRepository;
     private final DoctorProfileRepository doctorProfileRepository;
     private final ScheduleSlotRepository scheduleSlotRepository;
+    private final JdbcTemplate jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
+    private final Clock clock;
+    private final ZoneId hospitalZoneId;
 
     public DataSeeder(
             UserRepository userRepository,
@@ -44,18 +49,31 @@ public class DataSeeder implements ApplicationRunner {
             DepartmentRepository departmentRepository,
             DoctorProfileRepository doctorProfileRepository,
             ScheduleSlotRepository scheduleSlotRepository,
-            PasswordEncoder passwordEncoder) {
+            JdbcTemplate jdbcTemplate,
+            PasswordEncoder passwordEncoder,
+            Clock clock,
+            ZoneId hospitalZoneId) {
         this.userRepository = userRepository;
         this.patientProfileRepository = patientProfileRepository;
         this.departmentRepository = departmentRepository;
         this.doctorProfileRepository = doctorProfileRepository;
         this.scheduleSlotRepository = scheduleSlotRepository;
+        this.jdbcTemplate = jdbcTemplate;
         this.passwordEncoder = passwordEncoder;
+        this.clock = clock;
+        this.hospitalZoneId = hospitalZoneId;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        // This row lock is held by MySQL until the surrounding transaction commits.
+        // It therefore serializes seeders across application instances without
+        // releasing the lock before the seeded data becomes visible.
+        jdbcTemplate.queryForObject(
+                "SELECT id FROM seed_locks WHERE id = 1 FOR UPDATE",
+                Integer.class);
+
         seedUser(
                 "admin@smarthospital.local",
                 "Demo Administrator",
@@ -96,7 +114,7 @@ public class DataSeeder implements ApplicationRunner {
                         DEMO_LICENSE_NUMBER,
                         CONSULTATION_MINUTES)));
 
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        LocalDate today = LocalDate.now(clock.withZone(hospitalZoneId));
         seedSlot(doctor, today, LocalTime.of(9, 0));
         seedSlot(doctor, today, LocalTime.of(10, 0));
         seedSlot(doctor, today.plusDays(1), LocalTime.of(9, 0));
@@ -119,7 +137,7 @@ public class DataSeeder implements ApplicationRunner {
     }
 
     private void seedSlot(DoctorProfile doctor, LocalDate date, LocalTime startTime) {
-        Instant startsAt = date.atTime(startTime).toInstant(ZoneOffset.UTC);
+        Instant startsAt = date.atTime(startTime).atZone(hospitalZoneId).toInstant();
         if (scheduleSlotRepository.findByDoctor_IdAndStartsAt(doctor.getId(), startsAt).isEmpty()) {
             Instant endsAt = startsAt.plusSeconds(CONSULTATION_MINUTES * 60L);
             scheduleSlotRepository.save(new ScheduleSlot(doctor, startsAt, endsAt));

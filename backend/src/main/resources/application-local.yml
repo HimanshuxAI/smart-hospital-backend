@@ -2,7 +2,7 @@
 # These credentials are intentionally non-secret and must never be used in production.
 app:
   seed:
-    enabled: true
+    enabled: "${APP_SEED_ENABLED:true}"
 
 spring:
   datasource:

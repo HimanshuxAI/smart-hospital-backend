@@ -21,6 +21,6 @@ public interface DoctorProfileRepository extends JpaRepository<DoctorProfile, Lo
     List<DoctorProfile> findByActiveTrueOrderByUser_FullNameAsc();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select d from DoctorProfile d join fetch d.user where d.id = :doctorId")
+    @Query("select d from DoctorProfile d where d.id = :doctorId")
     Optional<DoctorProfile> findByIdForUpdate(@Param("doctorId") Long doctorId);
 }

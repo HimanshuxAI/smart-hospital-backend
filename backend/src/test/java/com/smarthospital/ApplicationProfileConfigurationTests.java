@@ -67,7 +67,7 @@ class ApplicationProfileConfigurationTests {
                 .isEqualTo("local-development-password");
         assertThat(value(configuration, "smart-hospital.security.jwt.secret"))
                 .isEqualTo("local-development-jwt-secret-change-before-production");
-        assertThat(value(configuration, "app.seed.enabled")).isEqualTo("true");
+        assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:true}");
     }
 
     @Test
@@ -103,6 +103,17 @@ class ApplicationProfileConfigurationTests {
                     assertThat(context.getEnvironment().getProperty("smart-hospital.security.jwt.secret"))
                             .isEqualTo("local-development-jwt-secret-change-before-production");
                 });
+    }
+
+    @Test
+    void localProfileAllowsSeedEnvironmentOverrideToDisableSeeding() {
+        new ApplicationContextRunner()
+                .withInitializer(new ConfigDataApplicationContextInitializer())
+                .withPropertyValues(
+                        "spring.profiles.active=local",
+                        "APP_SEED_ENABLED=false")
+                .run(context -> assertThat(context.getEnvironment().getProperty("app.seed.enabled"))
+                        .isEqualTo("false"));
     }
 
     @Test
