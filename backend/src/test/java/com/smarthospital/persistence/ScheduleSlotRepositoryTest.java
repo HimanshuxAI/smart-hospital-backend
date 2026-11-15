@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest
 class ScheduleSlotRepositoryTest extends MySqlIntegrationTest {
@@ -33,6 +34,9 @@ class ScheduleSlotRepositoryTest extends MySqlIntegrationTest {
 
     @Autowired
     private ScheduleSlotRepository scheduleSlotRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void explicitStartRangeExcludesTheExclusiveEndBoundary() {
@@ -87,6 +91,36 @@ class ScheduleSlotRepositoryTest extends MySqlIntegrationTest {
     }
 
     @Test
+    void activeOverlapExcludesTerminalSlotsEvenWhenTheirActiveFlagIsInconsistent() {
+        DoctorProfile doctor = persistDoctor();
+        Instant proposedStart = Instant.parse("2031-02-02T09:00:00Z");
+        Instant proposedEnd = Instant.parse("2031-02-02T11:00:00Z");
+
+        ScheduleSlot open = persistSlot(doctor, proposedStart.plusSeconds(60));
+        ScheduleSlot booked = persistSlot(doctor, proposedStart.plusSeconds(120));
+        ScheduleSlot cancelled = persistSlot(doctor, proposedStart.plusSeconds(180));
+        ScheduleSlot completed = persistSlot(doctor, proposedStart.plusSeconds(240));
+
+        jdbcTemplate.update(
+                "UPDATE schedule_slots SET status = 'BOOKED', active = true WHERE id = ?",
+                booked.getId());
+        jdbcTemplate.update(
+                "UPDATE schedule_slots SET status = 'CANCELLED', active = true WHERE id = ?",
+                cancelled.getId());
+        jdbcTemplate.update(
+                "UPDATE schedule_slots SET status = 'COMPLETED', active = true WHERE id = ?",
+                completed.getId());
+
+        List<ScheduleSlot> overlapping = scheduleSlotRepository.findActiveOverlappingByDoctor(
+                doctor.getId(),
+                proposedStart,
+                proposedEnd);
+
+        assertThat(overlapping).extracting(ScheduleSlot::getId)
+                .containsExactly(open.getId(), booked.getId());
+    }
+
+    @Test
     void optionalReasonLabelRoundTripsThroughTheEntityMapping() {
         DoctorProfile doctor = persistDoctor();
         Instant startsAt = Instant.parse("2031-03-01T09:00:00Z");
@@ -106,6 +140,13 @@ class ScheduleSlotRepositoryTest extends MySqlIntegrationTest {
         labelled.setReasonLabel("Updated consultation label");
         scheduleSlotRepository.flush();
         assertThat(labelled.getReasonLabel()).isEqualTo("Updated consultation label");
+    }
+
+    private ScheduleSlot persistSlot(DoctorProfile doctor, Instant startsAt) {
+        return scheduleSlotRepository.saveAndFlush(new ScheduleSlot(
+                doctor,
+                startsAt,
+                startsAt.plusSeconds(900)));
     }
 
     private DoctorProfile persistDoctor() {
