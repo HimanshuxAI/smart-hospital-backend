@@ -117,7 +117,7 @@ CREATE TABLE appointments (
     CONSTRAINT fk_appointments_cancelled_by FOREIGN KEY (cancelled_by_user_id) REFERENCES users (id) ON DELETE SET NULL,
     CONSTRAINT ck_appointments_status CHECK (status IN ('BOOKED', 'CHECKED_IN', 'COMPLETED', 'CANCELLED', 'NO_SHOW')),
     CONSTRAINT ck_appointments_active_marker CHECK (
-        (status IN ('BOOKED', 'CHECKED_IN') AND active_marker = 1)
+        (status IN ('BOOKED', 'CHECKED_IN') AND active_marker IS NOT NULL AND active_marker = 1)
         OR (status IN ('COMPLETED', 'CANCELLED', 'NO_SHOW') AND active_marker IS NULL)
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

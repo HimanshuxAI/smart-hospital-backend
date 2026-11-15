@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -87,6 +88,58 @@ class EntityInvariantTest extends MySqlIntegrationTest {
 
         appointment.transitionTo(AppointmentStatus.NO_SHOW);
         assertThat(appointment.getActiveMarker()).isNull();
+    }
+
+    @Test
+    void databaseRejectsNullActiveMarkerForActiveAppointments() {
+        DoctorProfile doctor = persistDoctor();
+        Appointment appointment = appointmentRepository.saveAndFlush(new Appointment(
+                persistPatient(),
+                doctor,
+                persistSlot(doctor),
+                LocalDate.now(),
+                "Synthetic raw active-marker visit"));
+
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                        "UPDATE appointments SET status = 'BOOKED', active_marker = NULL WHERE id = ?",
+                        appointment.getId()))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_appointments_active_marker");
+
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                        "UPDATE appointments SET status = 'CHECKED_IN', active_marker = NULL WHERE id = ?",
+                        appointment.getId()))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_appointments_active_marker");
+    }
+
+    @Test
+    void databaseRejectsNonNullActiveMarkerForTerminalAppointments() {
+        DoctorProfile doctor = persistDoctor();
+        Appointment appointment = appointmentRepository.saveAndFlush(new Appointment(
+                persistPatient(),
+                doctor,
+                persistSlot(doctor),
+                LocalDate.now(),
+                "Synthetic raw terminal-marker visit"));
+
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                        "UPDATE appointments SET status = 'COMPLETED', active_marker = 1 WHERE id = ?",
+                        appointment.getId()))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_appointments_active_marker");
+
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                        "UPDATE appointments SET status = 'CANCELLED', active_marker = 1 WHERE id = ?",
+                        appointment.getId()))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_appointments_active_marker");
+
+        assertThatThrownBy(() -> jdbcTemplate.update(
+                        "UPDATE appointments SET status = 'NO_SHOW', active_marker = 1 WHERE id = ?",
+                        appointment.getId()))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_appointments_active_marker");
     }
 
     @Test
