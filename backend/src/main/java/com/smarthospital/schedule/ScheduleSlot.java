@@ -109,16 +109,35 @@ public class ScheduleSlot {
         this.reasonLabel = reasonLabel;
     }
 
-    public void setStatus(ScheduleSlotStatus status) {
-        this.status = Objects.requireNonNull(status, "status must not be null");
+    public void markBooked() {
+        requireStatus(ScheduleSlotStatus.OPEN, "book");
+        status = ScheduleSlotStatus.BOOKED;
+        active = true;
+    }
+
+    public void cancel() {
+        if (status != ScheduleSlotStatus.OPEN && status != ScheduleSlotStatus.BOOKED) {
+            throw new IllegalStateException("cannot cancel schedule slot in status " + status);
+        }
+        status = ScheduleSlotStatus.CANCELLED;
+        active = false;
+    }
+
+    public void complete() {
+        requireStatus(ScheduleSlotStatus.BOOKED, "complete");
+        status = ScheduleSlotStatus.COMPLETED;
+        active = false;
+    }
+
+    private void requireStatus(ScheduleSlotStatus requiredStatus, String operation) {
+        if (status != requiredStatus) {
+            throw new IllegalStateException(
+                    "cannot " + operation + " schedule slot in status " + status);
+        }
     }
 
     public boolean isActive() {
         return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     public Instant getCreatedAt() {

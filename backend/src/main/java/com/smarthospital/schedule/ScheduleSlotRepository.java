@@ -32,6 +32,10 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
             select s from ScheduleSlot s
             where s.doctor.id = :doctorId
               and s.active = true
+              and s.status in (
+                  com.smarthospital.schedule.ScheduleSlotStatus.OPEN,
+                  com.smarthospital.schedule.ScheduleSlotStatus.BOOKED
+              )
               and s.startsAt < :proposedEnd
               and s.endsAt > :proposedStart
             order by s.startsAt asc, s.id asc

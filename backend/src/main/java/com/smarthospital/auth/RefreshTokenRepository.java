@@ -9,31 +9,37 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
- * Refresh-token write-lock order is: lock the incoming token first with
- * {@link #findByTokenHashForUpdate(String)}, then lock the complete token family with
- * {@link #findByFamilyIdForUpdate(String)} in ascending token-id order.
+ * Refresh-token writes must use this global lock sequence:
+ * <ol>
+ *     <li>Resolve the incoming token with the non-locking {@link #findByTokenHash(String)}
+ *     lookup and read its immutable family id.</li>
+ *     <li>Lock the complete family with {@link #findByFamilyIdForUpdate(String)} before
+ *     acquiring any refresh-token write lock.</li>
+ *     <li>Locate and revalidate the incoming token in the returned locked family set.</li>
+ * </ol>
+ * A direct locked-token lookup is intentionally not provided: two transactions using
+ * distinct incoming tokens could otherwise own different family rows before contending
+ * for the family and deadlock.
  */
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
+    /**
+     * Non-locking identity lookup used only to obtain the immutable family id.
+     */
     Optional<RefreshToken> findByTokenHash(String tokenHash);
 
     List<RefreshToken> findByFamilyIdAndRevokedAtIsNull(String familyId);
 
     List<RefreshToken> findByFamilyId(String familyId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select t from RefreshToken t join fetch t.user where t.tokenHash = :tokenHash")
-    Optional<RefreshToken> findByTokenHashForUpdate(@Param("tokenHash") String tokenHash);
-
     /**
-     * Locks every token in the family. Callers must use the repository-level lock
-     * order documented on this interface and must invoke this query inside the
-     * transaction that performs rotation or family revocation.
+     * Locks every token in the family in ascending token-id order. Callers must first
+     * resolve the incoming token without a lock, then invoke this query as the first
+     * write-lock operation in the transaction that rotates or revokes the family.
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select t from RefreshToken t
-            join fetch t.user
             where t.familyId = :familyId
             order by t.id asc
             """)

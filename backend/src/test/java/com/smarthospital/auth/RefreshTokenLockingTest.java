@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -33,7 +34,7 @@ class RefreshTokenLockingTest extends MySqlIntegrationTest {
     private PlatformTransactionManager transactionManager;
 
     @Test
-    void familyLockCoversEveryTokenInIdOrderAndBlocksUntilCommit() throws Exception {
+    void distinctIncomingTokensSerializeAcrossOneFamilyLock() throws Exception {
         User user = persistUser();
         String familyId = "family-" + UUID.randomUUID();
         RefreshToken first = persistToken(user, "a".repeat(64), familyId);
@@ -44,42 +45,70 @@ class RefreshTokenLockingTest extends MySqlIntegrationTest {
                 .toList();
 
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
-        CountDownLatch firstLocked = new CountDownLatch(1);
-        CountDownLatch secondStarted = new CountDownLatch(1);
-        CountDownLatch secondAcquired = new CountDownLatch(1);
-        CountDownLatch releaseFirst = new CountDownLatch(1);
+        CountDownLatch incomingTokensResolved = new CountDownLatch(2);
+        CountDownLatch startFamilyLocks = new CountDownLatch(1);
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         try {
-            Future<List<Long>> firstResult = executor.submit(() -> transactionTemplate.execute(status -> {
-                List<RefreshToken> locked = refreshTokenRepository.findByFamilyIdForUpdate(familyId);
-                firstLocked.countDown();
-                await(releaseFirst);
-                return locked.stream().map(RefreshToken::getId).toList();
+            Future<LockResult> firstResult = executor.submit(() -> transactionTemplate.execute(status -> {
+                RefreshToken incoming = refreshTokenRepository
+                        .findByTokenHash(first.getTokenHash())
+                        .orElseThrow();
+                incomingTokensResolved.countDown();
+                await(incomingTokensResolved);
+                await(startFamilyLocks);
+                return lockFamilyAndRevalidateIncoming(incoming);
             }));
 
-            Future<List<Long>> secondResult = executor.submit(() -> transactionTemplate.execute(status -> {
-                secondStarted.countDown();
-                await(firstLocked);
-                List<RefreshToken> locked = refreshTokenRepository.findByFamilyIdForUpdate(familyId);
-                secondAcquired.countDown();
-                return locked.stream().map(RefreshToken::getId).toList();
+            Future<LockResult> secondResult = executor.submit(() -> transactionTemplate.execute(status -> {
+                RefreshToken incoming = refreshTokenRepository
+                        .findByTokenHash(third.getTokenHash())
+                        .orElseThrow();
+                incomingTokensResolved.countDown();
+                await(incomingTokensResolved);
+                await(startFamilyLocks);
+                return lockFamilyAndRevalidateIncoming(incoming);
             }));
 
-            assertThat(firstLocked.await(5, TimeUnit.SECONDS)).isTrue();
-            assertThat(secondStarted.await(5, TimeUnit.SECONDS)).isTrue();
-            assertThat(secondAcquired.await(250, TimeUnit.MILLISECONDS))
-                    .as("competing family lock must wait for the first transaction")
-                    .isFalse();
+            assertThat(incomingTokensResolved.await(5, TimeUnit.SECONDS)).isTrue();
+            startFamilyLocks.countDown();
 
-            releaseFirst.countDown();
-
-            assertThat(firstResult.get(10, TimeUnit.SECONDS)).containsExactlyElementsOf(expectedIds);
-            assertThat(secondResult.get(10, TimeUnit.SECONDS)).containsExactlyElementsOf(expectedIds);
+            LockResult firstLock = requireSuccess(firstResult);
+            LockResult secondLock = requireSuccess(secondResult);
+            assertThat(firstLock.incomingId()).isEqualTo(first.getId());
+            assertThat(secondLock.incomingId()).isEqualTo(third.getId());
+            assertThat(firstLock.familyIds()).containsExactlyElementsOf(expectedIds);
+            assertThat(secondLock.familyIds()).containsExactlyElementsOf(expectedIds);
         } finally {
-            releaseFirst.countDown();
+            startFamilyLocks.countDown();
             executor.shutdownNow();
         }
+    }
+
+    private LockResult lockFamilyAndRevalidateIncoming(RefreshToken incoming) {
+        List<RefreshToken> lockedFamily = refreshTokenRepository
+                .findByFamilyIdForUpdate(incoming.getFamilyId());
+        RefreshToken lockedIncoming = lockedFamily.stream()
+                .filter(token -> token.getTokenHash().equals(incoming.getTokenHash()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(lockedIncoming.getFamilyId()).isEqualTo(incoming.getFamilyId());
+        return new LockResult(
+                lockedIncoming.getId(),
+                lockedFamily.stream().map(RefreshToken::getId).toList());
+    }
+
+    private LockResult requireSuccess(Future<LockResult> result) throws Exception {
+        try {
+            return result.get(10, TimeUnit.SECONDS);
+        } catch (ExecutionException exception) {
+            throw new AssertionError(
+                    "both family transactions must commit without deadlock",
+                    exception.getCause());
+        }
+    }
+
+    private record LockResult(Long incomingId, List<Long> familyIds) {
     }
 
     private User persistUser() {
