@@ -1,5 +1,6 @@
 package com.smarthospital.appointment;
 
+import com.smarthospital.dashboard.DashboardAppointmentProjection;
 import jakarta.persistence.LockModeType;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -45,6 +46,60 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("patientId") Long patientId,
             @Param("proposedStart") Instant proposedStart,
             @Param("proposedEnd") Instant proposedEnd);
+
+    @Query("""
+            select a.id as appointmentId,
+                   doctorUser.fullName as doctorName,
+                   d.specialty as specialty,
+                   patientUser.fullName as patientName,
+                   s.startsAt as startsAt,
+                   s.endsAt as endsAt,
+                   a.status as status,
+                   a.visitReason as visitReason
+            from Appointment a
+            join a.doctor d
+            join d.user doctorUser
+            join a.patient p
+            join p.user patientUser
+            join a.slot s
+            where a.patient.id = :patientId
+              and a.appointmentDate >= :fromDate
+              and a.status in (
+                  com.smarthospital.appointment.AppointmentStatus.BOOKED,
+                  com.smarthospital.appointment.AppointmentStatus.CHECKED_IN)
+            order by s.startsAt asc, a.id asc
+            """)
+    List<DashboardAppointmentProjection> findUpcomingForPatient(
+            @Param("patientId") Long patientId,
+            @Param("fromDate") LocalDate fromDate);
+
+    @Query("""
+            select a.id as appointmentId,
+                   doctorUser.fullName as doctorName,
+                   d.specialty as specialty,
+                   patientUser.fullName as patientName,
+                   s.startsAt as startsAt,
+                   s.endsAt as endsAt,
+                   a.status as status,
+                   a.visitReason as visitReason
+            from Appointment a
+            join a.doctor d
+            join d.user doctorUser
+            join a.patient p
+            join p.user patientUser
+            join a.slot s
+            where a.doctor.id = :doctorId
+              and a.appointmentDate = :date
+              and a.status in (
+                  com.smarthospital.appointment.AppointmentStatus.BOOKED,
+                  com.smarthospital.appointment.AppointmentStatus.CHECKED_IN)
+            order by s.startsAt asc, a.id asc
+            """)
+    List<DashboardAppointmentProjection> findScheduleForDoctor(
+            @Param("doctorId") Long doctorId,
+            @Param("date") LocalDate date);
+
+    long countByAppointmentDate(LocalDate appointmentDate);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Appointment a "

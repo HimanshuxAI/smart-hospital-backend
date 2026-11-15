@@ -1,5 +1,7 @@
 package com.smarthospital.auth;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,21 +24,26 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(tags = "Public", summary = "Register a patient")
     public TokenBundleResponse register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
     @PostMapping("/login")
+    @Operation(tags = "Public", summary = "Authenticate a user")
     public TokenBundleResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
     @PostMapping("/refresh")
+    @Operation(tags = "Public", summary = "Refresh an access token")
     public TokenBundleResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
         return authService.refresh(request);
     }
 
     @PostMapping("/logout")
+    @Operation(tags = "Authenticated", summary = "Revoke the presented token family")
+    @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(
             @AuthenticationPrincipal Jwt jwt,
@@ -45,6 +52,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @Operation(tags = "Authenticated", summary = "Get the authenticated user")
+    @SecurityRequirement(name = "bearerAuth")
     public CurrentUserResponse me(@AuthenticationPrincipal Jwt jwt) {
         return authService.currentUser(Long.valueOf(jwt.getSubject()));
     }

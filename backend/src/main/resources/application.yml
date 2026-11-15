@@ -61,6 +61,8 @@ springdoc:
 
 smart-hospital:
   time-zone: "${APP_TIME_ZONE:UTC}"
+  openapi:
+    server-url: "${OPENAPI_SERVER_URL:http://localhost:8080}"
   security:
     jwt:
       secret: "${JWT_SECRET}"

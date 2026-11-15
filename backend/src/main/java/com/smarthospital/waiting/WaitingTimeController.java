@@ -1,5 +1,7 @@
 package com.smarthospital.waiting;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,6 +22,10 @@ public class WaitingTimeController {
     }
 
     @GetMapping("/{entryId}/waiting-time")
+    @Operation(
+            tags = {"Patient", "Doctor", "Admin"},
+            summary = "Predict waiting time for an authorized queue entry")
+    @SecurityRequirement(name = "bearerAuth")
     public WaitingTimeResponse getWaitingTime(
             @PathVariable Long entryId,
             @AuthenticationPrincipal Jwt jwt) {
