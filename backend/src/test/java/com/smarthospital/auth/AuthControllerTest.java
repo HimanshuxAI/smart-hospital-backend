@@ -262,13 +262,25 @@ class AuthControllerTest extends MySqlIntegrationTest {
     }
 
     @Test
-    void actuatorHealthAndLivenessArePublic() throws Exception {
+    void actuatorHealthRootIsPublic() throws Exception {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
+    void actuatorHealthSubpathsRequireAuthentication() throws Exception {
         mockMvc.perform(get("/actuator/health/liveness"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("UP"));
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.path").value("/actuator/health/liveness"));
+
+        mockMvc.perform(get("/actuator/health/readiness"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.path").value("/actuator/health/readiness"));
     }
 
     @Test
