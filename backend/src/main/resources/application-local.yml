@@ -1,5 +1,9 @@
 # Local development only. Activate with SPRING_PROFILES_ACTIVE=local.
 # These credentials are intentionally non-secret and must never be used in production.
+app:
+  seed:
+    enabled: true
+
 spring:
   datasource:
     url: "jdbc:mysql://localhost:3306/smart_hospital_local?serverTimezone=UTC"

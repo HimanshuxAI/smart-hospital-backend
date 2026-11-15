@@ -45,6 +45,10 @@ management:
         enabled: true
       show-details: never
 
+app:
+  seed:
+    enabled: "${APP_SEED_ENABLED:false}"
+
 springdoc:
   api-docs:
     enabled: true
