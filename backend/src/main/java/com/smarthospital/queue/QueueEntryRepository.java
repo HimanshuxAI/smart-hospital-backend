@@ -80,6 +80,101 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
             @Param("queueDate") LocalDate queueDate,
             @Param("statuses") Collection<QueueStatus> statuses);
 
+    @Query("""
+            select q from QueueEntry q
+            join fetch q.doctor doctor
+            join fetch doctor.user
+            join fetch doctor.department
+            join fetch q.appointment appointment
+            join fetch appointment.slot
+            join fetch appointment.patient patient
+            join fetch patient.user
+            where doctor.id = :doctorId
+              and q.queueDate = :queueDate
+            order by
+              case
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL then 0
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.HIGH then 1
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.MEDIUM then 2
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.NORMAL then 3
+                else 4
+              end,
+              q.arrivedAt asc,
+              q.id asc
+            """)
+    List<QueueEntry> findDetailedQueueForDoctor(
+            @Param("doctorId") Long doctorId,
+            @Param("queueDate") LocalDate queueDate);
+
+    @Query("""
+            select q from QueueEntry q
+            join fetch q.doctor doctor
+            join fetch doctor.user
+            join fetch doctor.department
+            join fetch q.appointment appointment
+            join fetch appointment.slot
+            join fetch appointment.patient patient
+            join fetch patient.user
+            where patient.id = :patientId
+              and q.queueDate = :queueDate
+            order by
+              case
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL then 0
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.HIGH then 1
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.MEDIUM then 2
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.NORMAL then 3
+                else 4
+              end,
+              q.arrivedAt asc,
+              q.id asc
+            """)
+    List<QueueEntry> findDetailedQueueForPatient(
+            @Param("patientId") Long patientId,
+            @Param("queueDate") LocalDate queueDate);
+
+    @Query("""
+            select q from QueueEntry q
+            where q.doctor.id in :doctorIds
+              and q.queueDate = :queueDate
+              and q.status = :status
+            order by q.doctor.id asc,
+              case
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL then 0
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.HIGH then 1
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.MEDIUM then 2
+                when q.emergencyTier = com.smarthospital.queue.EmergencyTier.NORMAL then 3
+                else 4
+              end,
+              q.arrivedAt asc,
+              q.id asc
+            """)
+    List<QueueEntry> findCanonicalWaitingQueuesForDoctors(
+            @Param("doctorIds") Collection<Long> doctorIds,
+            @Param("queueDate") LocalDate queueDate,
+            @Param("status") QueueStatus status);
+
+    @Query("""
+            select q from QueueEntry q
+            join fetch q.doctor doctor
+            join fetch doctor.user
+            join fetch doctor.department
+            join fetch q.appointment appointment
+            join fetch appointment.slot
+            join fetch appointment.patient patient
+            join fetch patient.user
+            where q.id = :entryId
+            """)
+    Optional<QueueEntry> findDetailedById(@Param("entryId") Long entryId);
+
+    @Query("""
+            select q.doctor.id as doctorId,
+                   q.appointment.id as appointmentId,
+                   q.appointment.patient.user.id as patientUserId
+            from QueueEntry q
+            where q.id = :entryId
+            """)
+    Optional<QueueEntryScope> findScopeById(@Param("entryId") Long entryId);
+
     @Query("select coalesce(max(q.tokenNumber), 0) from QueueEntry q "
             + "where q.doctor.id = :doctorId and q.queueDate = :queueDate")
     int findMaximumTokenNumber(
@@ -116,19 +211,23 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
             @Param("arrivedAt") java.time.Instant arrivedAt,
             @Param("entryId") Long entryId);
 
+    long countByDoctor_IdAndQueueDateAndStatus(
+            Long doctorId,
+            LocalDate queueDate,
+            QueueStatus status);
+
+    long countByDoctor_IdAndQueueDateAndStatusIn(
+            Long doctorId,
+            LocalDate queueDate,
+            Collection<QueueStatus> statuses);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select q from QueueEntry q "
-            + "join fetch q.doctor "
-            + "join fetch q.appointment "
-            + "where q.appointment.id = :appointmentId")
+    @Query("select q from QueueEntry q where q.appointment.id = :appointmentId")
     Optional<QueueEntry> findByAppointment_IdForUpdate(
             @Param("appointmentId") Long appointmentId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select q from QueueEntry q "
-            + "join fetch q.doctor "
-            + "join fetch q.appointment "
-            + "where q.id = :entryId")
+    @Query("select q from QueueEntry q where q.id = :entryId")
     Optional<QueueEntry> findByIdForUpdate(@Param("entryId") Long entryId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
@@ -154,4 +253,13 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
             @Param("doctorId") Long doctorId,
             @Param("queueDate") LocalDate queueDate,
             @Param("statuses") Collection<QueueStatus> statuses);
+
+    interface QueueEntryScope {
+
+        Long getDoctorId();
+
+        Long getAppointmentId();
+
+        Long getPatientUserId();
+    }
 }

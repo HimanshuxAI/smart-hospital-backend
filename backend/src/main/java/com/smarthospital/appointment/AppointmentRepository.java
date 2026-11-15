@@ -53,10 +53,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Optional<LocalDate> findAppointmentDateById(@Param("appointmentId") Long appointmentId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select a from Appointment a "
-            + "join fetch a.patient "
-            + "join fetch a.doctor "
-            + "join fetch a.slot "
-            + "where a.id = :appointmentId")
+    @Query("select a from Appointment a where a.id = :appointmentId")
     Optional<Appointment> findByIdForUpdate(@Param("appointmentId") Long appointmentId);
 }
