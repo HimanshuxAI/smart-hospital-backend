@@ -49,6 +49,47 @@ class ScheduleSlotLifecycleTest {
     }
 
     @Test
+    void bookedSlotCanBeReleasedAndReopened() {
+        ScheduleSlot slot = new ScheduleSlot(doctor, STARTS_AT, STARTS_AT.plusSeconds(900));
+        slot.markBooked();
+
+        slot.release();
+
+        assertThat(slot.getStatus()).isEqualTo(ScheduleSlotStatus.OPEN);
+        assertThat(slot.isActive()).isTrue();
+    }
+
+    @Test
+    void releaseRejectsNonBookedStatesAndLeavesThemUnchanged() {
+        ScheduleSlot open = new ScheduleSlot(doctor, STARTS_AT, STARTS_AT.plusSeconds(900));
+
+        assertThatThrownBy(open::release)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("OPEN");
+        assertThat(open.getStatus()).isEqualTo(ScheduleSlotStatus.OPEN);
+        assertThat(open.isActive()).isTrue();
+
+        ScheduleSlot cancelled = new ScheduleSlot(doctor, STARTS_AT, STARTS_AT.plusSeconds(900));
+        cancelled.cancel();
+
+        assertThatThrownBy(cancelled::release)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("CANCELLED");
+        assertThat(cancelled.getStatus()).isEqualTo(ScheduleSlotStatus.CANCELLED);
+        assertThat(cancelled.isActive()).isFalse();
+
+        ScheduleSlot completed = new ScheduleSlot(doctor, STARTS_AT, STARTS_AT.plusSeconds(900));
+        completed.markBooked();
+        completed.complete();
+
+        assertThatThrownBy(completed::release)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("COMPLETED");
+        assertThat(completed.getStatus()).isEqualTo(ScheduleSlotStatus.COMPLETED);
+        assertThat(completed.isActive()).isFalse();
+    }
+
+    @Test
     void bookedSlotCanBeCompletedAndBecomesInactive() {
         ScheduleSlot slot = new ScheduleSlot(doctor, STARTS_AT, STARTS_AT.plusSeconds(900));
         slot.markBooked();
