@@ -115,6 +115,17 @@ public class ScheduleSlot {
         active = true;
     }
 
+    /**
+     * Releases a booked slot so it can be booked again. The Task 5 cancellation flow
+     * must lock and cancel the appointment before locking and releasing the slot, and
+     * must perform both operations in the same transaction.
+     */
+    public void release() {
+        requireStatus(ScheduleSlotStatus.BOOKED, "release");
+        status = ScheduleSlotStatus.OPEN;
+        active = true;
+    }
+
     public void cancel() {
         if (status != ScheduleSlotStatus.OPEN && status != ScheduleSlotStatus.BOOKED) {
             throw new IllegalStateException("cannot cancel schedule slot in status " + status);
