@@ -46,12 +46,16 @@ public class RefreshTokenService {
         String rawToken = generateRawToken();
         String tokenHash = hash(rawToken);
         String familyId = UUID.randomUUID().toString();
-        Instant expiresAt = clock.instant().plus(properties.expiration());
+        Instant now = clock.instant();
+        Instant familyDeadline = now.plus(properties.familyLifetime());
+        Instant expiresAt = earlier(now.plus(properties.expiration()), familyDeadline);
         RefreshToken token = refreshTokenRepository.saveAndFlush(new RefreshToken(
                 user,
                 tokenHash,
                 familyId,
-                expiresAt));
+                expiresAt,
+                familyDeadline,
+                user.getAuthVersion()));
         return new IssuedRefreshToken(rawToken, token.getTokenHash(), token.getFamilyId(), expiresAt);
     }
 
@@ -82,7 +86,16 @@ public class RefreshTokenService {
             throw invalidRefreshToken();
         }
         Instant now = clock.instant();
-        if (!incoming.getExpiresAt().isAfter(now)) {
+        if (!incoming.getExpiresAt().isAfter(now)
+                || !incoming.getFamilyDeadline().isAfter(now)
+                || incoming.getExpiresAt().isAfter(incoming.getFamilyDeadline())) {
+            revokeFamilyLocked(lockedFamily, now);
+            refreshTokenRepository.flush();
+            throw invalidRefreshToken();
+        }
+        if (incoming.getAuthVersion() != incoming.getUser().getAuthVersion()) {
+            revokeFamilyLocked(lockedFamily, now);
+            refreshTokenRepository.flush();
             throw invalidRefreshToken();
         }
         if (!incoming.getUser().isActive()) {
@@ -94,14 +107,18 @@ public class RefreshTokenService {
 
         String replacementRawToken = generateRawToken();
         String replacementHash = hash(replacementRawToken);
-        Instant replacementExpiresAt = now.plus(properties.expiration());
+        Instant replacementExpiresAt = earlier(
+                now.plus(properties.expiration()),
+                incoming.getFamilyDeadline());
         incoming.replaceWith(replacementHash, now);
         refreshTokenRepository.save(incoming);
         RefreshToken replacement = refreshTokenRepository.save(new RefreshToken(
                 incoming.getUser(),
                 replacementHash,
                 incoming.getFamilyId(),
-                replacementExpiresAt));
+                replacementExpiresAt,
+                incoming.getFamilyDeadline(),
+                incoming.getAuthVersion()));
         refreshTokenRepository.flush();
 
         return new RotationResult(
@@ -127,6 +144,10 @@ public class RefreshTokenService {
         }
         revokeFamilyLocked(lockedFamily, clock.instant());
         refreshTokenRepository.flush();
+    }
+
+    private static Instant earlier(Instant first, Instant second) {
+        return first.isBefore(second) ? first : second;
     }
 
     private static RefreshToken locateLockedToken(List<RefreshToken> lockedFamily, String tokenHash) {

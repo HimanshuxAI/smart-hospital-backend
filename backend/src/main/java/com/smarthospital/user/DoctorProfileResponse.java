@@ -14,4 +14,12 @@ public record DoctorProfileResponse(
         String licenseNumber,
         int averageConsultationMinutes,
         boolean profileActive) {
+
+    @Override
+    public String toString() {
+        return "DoctorProfileResponse[id=" + id + ", userId=" + userId + ", role=" + role
+                + ", active=" + active + ", departmentId=" + departmentId
+                + ", averageConsultationMinutes=" + averageConsultationMinutes
+                + ", profileActive=" + profileActive + ", details=REDACTED]";
+    }
 }

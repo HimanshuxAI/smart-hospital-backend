@@ -1,10 +1,12 @@
 package com.smarthospital.auth;
 
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -31,6 +33,33 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     List<RefreshToken> findByFamilyIdAndRevokedAtIsNull(String familyId);
 
     List<RefreshToken> findByFamilyId(String familyId);
+
+    /**
+     * Selects a bounded set of families whose latest row is already beyond the
+     * cleanup cutoff. The grouped maximum prevents a family with any live row
+     * from being selected.
+     */
+    @Query("""
+            select token.familyId
+            from RefreshToken token
+            group by token.familyId
+            having max(token.familyDeadline) < :cutoff
+            order by min(token.familyDeadline) asc
+            """)
+    List<String> findExpiredFamilyIds(Instant cutoff, Pageable pageable);
+
+    /**
+     * Locks all refresh credentials belonging to a user in ascending token-id order.
+     * This is used only after the target user row has been locked by the activation
+     * boundary, preserving the documented user-then-refresh-row lock order.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select t from RefreshToken t
+            where t.user.id = :userId
+            order by t.id asc
+            """)
+    List<RefreshToken> findByUserIdForUpdate(@Param("userId") Long userId);
 
     /**
      * Locks every token in the family in ascending token-id order. Callers must first

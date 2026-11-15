@@ -36,6 +36,24 @@ class ApplicationProfileConfigurationTests {
         assertThat(value(configuration, "spring.jackson.deserialization.fail-on-unknown-properties"))
                 .isEqualTo("true");
         assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:false}");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins"))
+                .isEqualTo("${CORS_ALLOWED_ORIGINS:}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.window"))
+                .isEqualTo("${AUTH_RATE_LIMIT_WINDOW:PT1M}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.max-tracked-entries"))
+                .isEqualTo("${AUTH_RATE_LIMIT_MAX_TRACKED_ENTRIES:10000}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.login.account-limit"))
+                .isEqualTo("${AUTH_LOGIN_ACCOUNT_RATE_LIMIT:5}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.login.ip-limit"))
+                .isEqualTo("${AUTH_LOGIN_IP_RATE_LIMIT:20}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.registration.account-limit"))
+                .isEqualTo("${AUTH_REGISTRATION_ACCOUNT_RATE_LIMIT:3}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.registration.ip-limit"))
+                .isEqualTo("${AUTH_REGISTRATION_IP_RATE_LIMIT:10}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.refresh.token-limit"))
+                .isEqualTo("${AUTH_REFRESH_TOKEN_RATE_LIMIT:10}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.refresh.ip-limit"))
+                .isEqualTo("${AUTH_REFRESH_IP_RATE_LIMIT:30}");
     }
 
     @Test
@@ -74,6 +92,10 @@ class ApplicationProfileConfigurationTests {
         assertThat(value(configuration, "smart-hospital.security.jwt.issuer"))
                 .isEqualTo("smart-hospital-backend-local");
         assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:true}");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins[0]"))
+                .isEqualTo("http://localhost:3000");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins[1]"))
+                .isEqualTo("http://localhost:5173");
     }
 
     @Test
@@ -93,6 +115,8 @@ class ApplicationProfileConfigurationTests {
         assertThat(value(configuration, "smart-hospital.security.jwt.issuer")).isEqualTo("${JWT_ISSUER}");
         assertThat(value(configuration, "smart-hospital.security.refresh-token.expiration"))
                 .isEqualTo("${JWT_REFRESH_TOKEN_EXPIRATION}");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins"))
+                .isEqualTo("${CORS_ALLOWED_ORIGINS}");
     }
 
     @Test
