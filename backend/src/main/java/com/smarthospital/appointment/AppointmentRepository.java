@@ -46,6 +46,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("proposedStart") Instant proposedStart,
             @Param("proposedEnd") Instant proposedEnd);
 
+    @Query("select a.doctor.id from Appointment a where a.id = :appointmentId")
+    Optional<Long> findDoctorIdById(@Param("appointmentId") Long appointmentId);
+
+    @Query("select a.appointmentDate from Appointment a where a.id = :appointmentId")
+    Optional<LocalDate> findAppointmentDateById(@Param("appointmentId") Long appointmentId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Appointment a "
             + "join fetch a.patient "

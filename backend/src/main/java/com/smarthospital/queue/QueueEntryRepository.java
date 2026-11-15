@@ -86,6 +86,44 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
             @Param("doctorId") Long doctorId,
             @Param("queueDate") LocalDate queueDate);
 
+    @Query("""
+            select count(q) from QueueEntry q
+            where q.doctor.id = :doctorId
+              and q.queueDate = :queueDate
+              and q.status = :status
+              and (
+                (:targetTier = com.smarthospital.queue.EmergencyTier.NORMAL
+                    and q.emergencyTier in (
+                        com.smarthospital.queue.EmergencyTier.CRITICAL,
+                        com.smarthospital.queue.EmergencyTier.HIGH,
+                        com.smarthospital.queue.EmergencyTier.MEDIUM))
+                or (:targetTier = com.smarthospital.queue.EmergencyTier.MEDIUM
+                    and q.emergencyTier in (
+                        com.smarthospital.queue.EmergencyTier.CRITICAL,
+                        com.smarthospital.queue.EmergencyTier.HIGH))
+                or (:targetTier = com.smarthospital.queue.EmergencyTier.HIGH
+                    and q.emergencyTier = com.smarthospital.queue.EmergencyTier.CRITICAL)
+                or (q.emergencyTier = :targetTier
+                    and (q.arrivedAt < :arrivedAt
+                        or (q.arrivedAt = :arrivedAt and q.id < :entryId)))
+              )
+            """)
+    long countWaitingEntriesAhead(
+            @Param("doctorId") Long doctorId,
+            @Param("queueDate") LocalDate queueDate,
+            @Param("status") QueueStatus status,
+            @Param("targetTier") EmergencyTier targetTier,
+            @Param("arrivedAt") java.time.Instant arrivedAt,
+            @Param("entryId") Long entryId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select q from QueueEntry q "
+            + "join fetch q.doctor "
+            + "join fetch q.appointment "
+            + "where q.appointment.id = :appointmentId")
+    Optional<QueueEntry> findByAppointment_IdForUpdate(
+            @Param("appointmentId") Long appointmentId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select q from QueueEntry q "
             + "join fetch q.doctor "
