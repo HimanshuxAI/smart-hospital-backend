@@ -1,0 +1,115 @@
+package com.smarthospital.schedule;
+
+import com.smarthospital.doctor.DoctorProfile;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import java.time.Instant;
+import java.util.Objects;
+
+@Entity
+@Table(name = "schedule_slots", uniqueConstraints = @UniqueConstraint(
+        name = "uk_schedule_slots_doctor_start", columnNames = {"doctor_id", "starts_at"}))
+public class ScheduleSlot {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private DoctorProfile doctor;
+
+    @Column(name = "starts_at", nullable = false)
+    private Instant startsAt;
+
+    @Column(name = "ends_at", nullable = false)
+    private Instant endsAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private ScheduleSlotStatus status;
+
+    @Column(name = "active", nullable = false)
+    private boolean active;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    protected ScheduleSlot() {
+    }
+
+    public ScheduleSlot(DoctorProfile doctor, Instant startsAt, Instant endsAt) {
+        this.doctor = Objects.requireNonNull(doctor, "doctor must not be null");
+        this.startsAt = Objects.requireNonNull(startsAt, "startsAt must not be null");
+        this.endsAt = Objects.requireNonNull(endsAt, "endsAt must not be null");
+        this.status = ScheduleSlotStatus.OPEN;
+        this.active = true;
+    }
+
+    @PrePersist
+    void onCreate() {
+        Instant now = Instant.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = Instant.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public DoctorProfile getDoctor() {
+        return doctor;
+    }
+
+    public Instant getStartsAt() {
+        return startsAt;
+    }
+
+    public Instant getEndsAt() {
+        return endsAt;
+    }
+
+    public ScheduleSlotStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ScheduleSlotStatus status) {
+        this.status = Objects.requireNonNull(status, "status must not be null");
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+}

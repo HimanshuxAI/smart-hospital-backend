@@ -31,6 +31,7 @@ class ApplicationProfileConfigurationTests {
         assertThat(value(configuration, "spring.security.user.name")).isEqualTo("${SECURITY_USERNAME}");
         assertThat(value(configuration, "spring.security.user.password")).isEqualTo("${SECURITY_PASSWORD}");
         assertThat(value(configuration, "smart-hospital.security.jwt.secret")).isEqualTo("${JWT_SECRET}");
+        assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:false}");
     }
 
     @Test
@@ -66,6 +67,7 @@ class ApplicationProfileConfigurationTests {
                 .isEqualTo("local-development-password");
         assertThat(value(configuration, "smart-hospital.security.jwt.secret"))
                 .isEqualTo("local-development-jwt-secret-change-before-production");
+        assertThat(value(configuration, "app.seed.enabled")).isEqualTo("true");
     }
 
     @Test
