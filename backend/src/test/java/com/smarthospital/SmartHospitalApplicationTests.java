@@ -10,7 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.flyway.enabled=false"
+        "spring.flyway.enabled=false",
+        "smart-hospital.security.jwt.secret=test-jwt-secret-with-at-least-32-characters"
 })
 class SmartHospitalApplicationTests {
 
