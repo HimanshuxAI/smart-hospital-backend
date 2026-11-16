@@ -2,6 +2,7 @@ import { useAuth } from "../../auth/auth-context";
 import { AppShell } from "../../components/layout/AppShell";
 import { PriorityBadge } from "../queue/PriorityBadge";
 import { mockPatientDashboard } from "../../mocks/data";
+import { Link } from "react-router-dom";
 import { 
   Calendar, 
   Clock, 
@@ -10,8 +11,7 @@ import {
   ArrowUpRight, 
   User, 
   CheckCircle2, 
-  Activity,
-  Layers
+  Activity
 } from "lucide-react";
 
 export function PatientDashboardPage() {
@@ -25,7 +25,7 @@ export function PatientDashboardPage() {
     <AppShell role="PATIENT" user={user} demoMode={isDemo}>
       <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
         
-        {/* Editorial Greeting Header */}
+        {/* Header */}
         <div style={{
           display: "flex",
           justifyContent: "space-between",
@@ -76,7 +76,7 @@ export function PatientDashboardPage() {
           </div>
         </div>
 
-        {/* Tactile Asymmetric Cards */}
+        {/* 2 Physical Asymmetric Cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "2rem" }}>
           
           {/* Active Live Ticket Board */}
@@ -180,11 +180,22 @@ export function PatientDashboardPage() {
               marginTop: "2rem",
               paddingTop: "1.25rem",
               borderTop: "1.5px dashed var(--color-border)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.72rem",
-              color: "var(--color-muted)"
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
             }}>
-              DATA REFRESH: REALTIME WEBSOCKET STREAM
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)" }}>
+                DATA REFRESH: REALTIME WEBSOCKET STREAM
+              </span>
+              <Link to="/patient/queue" style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: "var(--accent-vermilion)",
+                textDecoration: "none"
+              }}>
+                FULL PASS →
+              </Link>
             </div>
           </div>
 
@@ -264,14 +275,14 @@ export function PatientDashboardPage() {
             </div>
 
             <div style={{ marginTop: "2rem", paddingTop: "1.25rem", borderTop: "1.5px dashed var(--color-border)" }}>
-              <button
-                type="button"
+              <Link
+                to="/patient/doctors"
                 className="button button-primary"
-                style={{ width: "100%", justifyContent: "space-between" }}
+                style={{ width: "100%", justifyContent: "space-between", background: "var(--accent-vermilion)", borderColor: "var(--color-ink)" }}
               >
                 <span>BOOK NEW SLOT</span>
                 <ArrowUpRight size={18} />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
