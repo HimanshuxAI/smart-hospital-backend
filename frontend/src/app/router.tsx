@@ -9,6 +9,16 @@ import { NotFoundPage } from "../features/shared/NotFoundPage";
 const PatientDashboard = lazy(() =>
   import("../features/patient/PatientDashboardPage").then((m) => ({ default: m.PatientDashboardPage }))
 );
+const PatientDoctors = lazy(() =>
+  import("../features/patient/PatientDoctorsPage").then((m) => ({ default: m.PatientDoctorsPage }))
+);
+const PatientAppointments = lazy(() =>
+  import("../features/patient/PatientAppointmentsPage").then((m) => ({ default: m.PatientAppointmentsPage }))
+);
+const PatientQueue = lazy(() =>
+  import("../features/patient/PatientQueuePage").then((m) => ({ default: m.PatientQueuePage }))
+);
+
 const DoctorDashboard = lazy(() =>
   import("../features/doctor/DoctorDashboardPage").then((m) => ({ default: m.DoctorDashboardPage }))
 );
@@ -29,6 +39,8 @@ export const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
+  
+  // Patient subroutes
   {
     path: "/patient",
     element: (
@@ -42,6 +54,44 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: "/patient/doctors",
+    element: (
+      <RequireAuth>
+        <RequireRole role="PATIENT">
+          <Suspense fallback={<div className="page-state">Loading doctors...</div>}>
+            <PatientDoctors />
+          </Suspense>
+        </RequireRole>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/patient/appointments",
+    element: (
+      <RequireAuth>
+        <RequireRole role="PATIENT">
+          <Suspense fallback={<div className="page-state">Loading appointments...</div>}>
+            <PatientAppointments />
+          </Suspense>
+        </RequireRole>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/patient/queue",
+    element: (
+      <RequireAuth>
+        <RequireRole role="PATIENT">
+          <Suspense fallback={<div className="page-state">Loading queue...</div>}>
+            <PatientQueue />
+          </Suspense>
+        </RequireRole>
+      </RequireAuth>
+    ),
+  },
+
+  // Doctor route & subroutes
+  {
     path: "/doctor",
     element: (
       <RequireAuth>
@@ -54,6 +104,20 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: "/doctor/*",
+    element: (
+      <RequireAuth>
+        <RequireRole role="DOCTOR">
+          <Suspense fallback={<div className="page-state">Loading station...</div>}>
+            <DoctorDashboard />
+          </Suspense>
+        </RequireRole>
+      </RequireAuth>
+    ),
+  },
+
+  // Admin route & subroutes
+  {
     path: "/admin",
     element: (
       <RequireAuth>
@@ -65,6 +129,19 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
   },
+  {
+    path: "/admin/*",
+    element: (
+      <RequireAuth>
+        <RequireRole role="ADMIN">
+          <Suspense fallback={<div className="page-state">Loading admin console...</div>}>
+            <AdminDashboard />
+          </Suspense>
+        </RequireRole>
+      </RequireAuth>
+    ),
+  },
+
   {
     path: "/403",
     element: <ForbiddenPage />,
