@@ -1,0 +1,21 @@
+# Local development only. Activate with SPRING_PROFILES_ACTIVE=local.
+# These credentials are intentionally non-secret and must never be used in production.
+app:
+  seed:
+    enabled: "${APP_SEED_ENABLED:true}"
+
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/smart_hospital_local?serverTimezone=UTC"
+    username: smart_hospital_local
+    password: local-development-password
+  security:
+    user:
+      name: local-user
+      password: local-development-password
+
+smart-hospital:
+  security:
+    jwt:
+      secret: local-development-jwt-secret-change-before-production
+      issuer: smart-hospital-backend-local

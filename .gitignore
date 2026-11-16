@@ -19,6 +19,10 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+build/
+dist/
+.eggs/
+*.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -31,7 +35,11 @@ htmlcov/
 .env
 .env.*
 !.env.example
-application-local.yml
+
+# Frontend dependencies and generated output
+node_modules/
+coverage/
+.vite/
 
 # OS / editors
 Thumbs.db
