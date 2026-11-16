@@ -44,7 +44,7 @@ jobs:
       - name: Build & Test ML Service
         run: |
           cd ml-service
-          pip install . pytest
+          pip install . pytest httpx
           pytest tests
 
       # 3. Test Frontend React Vite
