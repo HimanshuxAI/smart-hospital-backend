@@ -1,5 +1,7 @@
 package com.smarthospital.auth;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.Locale;
@@ -28,6 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(tags = "Public", summary = "Register a patient")
     public TokenBundleResponse register(
             @Valid @RequestBody RegisterRequest request,
             HttpServletRequest servletRequest) {
@@ -39,6 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(tags = "Public", summary = "Authenticate a user")
     public TokenBundleResponse login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest servletRequest) {
@@ -50,6 +54,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(tags = "Public", summary = "Refresh an access token")
     public TokenBundleResponse refresh(
             @Valid @RequestBody RefreshTokenRequest request,
             HttpServletRequest servletRequest) {
@@ -61,6 +66,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @Operation(tags = "Authenticated", summary = "Revoke the presented token family")
+    @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(
             @AuthenticationPrincipal Jwt jwt,
@@ -69,6 +76,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @Operation(tags = "Authenticated", summary = "Get the authenticated user")
+    @SecurityRequirement(name = "bearerAuth")
     public CurrentUserResponse me(@AuthenticationPrincipal Jwt jwt) {
         return authService.currentUser(Long.valueOf(jwt.getSubject()));
     }
