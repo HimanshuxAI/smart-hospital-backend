@@ -6,9 +6,9 @@ app:
 
 spring:
   datasource:
-    url: "jdbc:mysql://localhost:3306/smart_hospital_local?serverTimezone=UTC"
-    username: smart_hospital_local
-    password: local-development-password
+    url: "${DB_URL:jdbc:mysql://localhost:3306/smart_hospital_local?serverTimezone=UTC}"
+    username: "${DB_USERNAME:smart_hospital_local}"
+    password: "${DB_PASSWORD:local-development-password}"
   security:
     user:
       name: local-user
