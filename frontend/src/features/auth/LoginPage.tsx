@@ -102,29 +102,14 @@ export function LoginPage() {
         </div>
 
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          <span style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            padding: "0.25rem 0.65rem",
-            border: "1.5px solid var(--color-ink)",
-            background: "var(--accent-wasabi)",
-            borderRadius: "3px",
-            fontSize: "0.7rem",
-            fontFamily: "var(--font-mono)",
-            fontWeight: 700,
-            boxShadow: "2px 2px 0px var(--color-ink)"
-          }}>
-            <span className="status-dot" /> LIVE ENGINE
-          </span>
           <Link
             to="/register"
             style={{
-              padding: "0.35rem 0.85rem",
+              padding: "0.45rem 1rem",
               border: "1.5px solid var(--color-ink)",
-              borderRadius: "3px",
+              borderRadius: "4px",
               background: "#ffffff",
-              fontSize: "0.75rem",
+              fontSize: "0.8rem",
               fontWeight: 700,
               fontFamily: "var(--font-display)",
               color: "var(--color-ink)",
@@ -419,12 +404,12 @@ export function LoginPage() {
         alignItems: "center",
         flexWrap: "wrap",
         gap: "1rem",
-        fontSize: "0.72rem",
+        fontSize: "0.75rem",
         fontFamily: "var(--font-mono)",
         color: "var(--color-muted)"
       }}>
-        <div>SYSTEM STATUS: NORMAL // ENCRYPTED AES-256 // ZERO-KNOWLEDGE ARCHITECTURE</div>
-        <div>AEGLE CLINICAL ENGINE © 2026 • DESIGNED FOR HIGH-PRESSURE BIOMEDICAL WORKFLOWS</div>
+        <div>SMART HOSPITAL PLATFORM © 2026</div>
+        <div>CLINICAL APPOINTMENTS & REAL-TIME QUEUE FLOW</div>
       </footer>
     </div>
   );

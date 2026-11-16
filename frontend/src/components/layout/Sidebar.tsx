@@ -10,12 +10,14 @@ import {
   TicketCheck,
   UserRoundCog,
   UsersRound,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import type { UserRole } from "../../api/types";
 import { navigationByRole, roleLabels } from "../../lib/constants";
+import { useAuth } from "../../auth/auth-context";
 
 const icons: Record<string, LucideIcon> = {
   overview: LayoutDashboard,
@@ -29,18 +31,27 @@ const icons: Record<string, LucideIcon> = {
   departments: Activity,
 };
 
-export function Sidebar({ role }: { role: UserRole }) {
+export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () => void }) {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <aside className="sidebar">
       <div className="brand">
         <span className="brand-mark" aria-hidden="true">
           <HeartPulse size={21} />
         </span>
-        <span>
+        <div>
           <strong>Smart Hospital</strong>
           <small>{roleLabels[role]}</small>
-        </span>
+        </div>
       </div>
+
       <nav className="sidebar-nav" aria-label={`${role.toLowerCase()} navigation`}>
         {navigationByRole[role].map((item) => {
           const Icon = icons[item.icon] ?? ListChecks;
@@ -48,20 +59,36 @@ export function Sidebar({ role }: { role: UserRole }) {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={onNavigate}
               end={item.path === `/${role.toLowerCase()}`}
               className={({ isActive }) =>
                 `sidebar-link ${isActive ? "sidebar-link-active" : ""}`.trim()
               }
             >
-              <Icon size={19} aria-hidden="true" />
+              <Icon size={18} aria-hidden="true" />
               <span>{item.label}</span>
             </NavLink>
           );
         })}
       </nav>
-      <div className="sidebar-footer">
-        <span className="status-dot" aria-hidden="true" />
-        All systems operational
+
+      <div style={{ marginTop: "auto", paddingTop: "1rem", borderTop: "1.5px dashed var(--color-border)" }}>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="button button-secondary"
+          style={{
+            width: "100%",
+            justifyContent: "flex-start",
+            gap: "0.6rem",
+            color: "#dc2626",
+            borderColor: "var(--color-ink)",
+            fontSize: "0.82rem"
+          }}
+        >
+          <LogOut size={16} color="#dc2626" />
+          <span>Sign Out</span>
+        </button>
       </div>
     </aside>
   );
