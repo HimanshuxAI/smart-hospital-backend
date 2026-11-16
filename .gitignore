@@ -36,6 +36,11 @@ htmlcov/
 .env.*
 !.env.example
 
+# Frontend dependencies and generated output
+node_modules/
+coverage/
+.vite/
+
 # OS / editors
 Thumbs.db
 *.swp
