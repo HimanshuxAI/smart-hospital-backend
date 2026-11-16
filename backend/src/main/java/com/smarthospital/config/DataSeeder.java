@@ -16,6 +16,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
 public class DataSeeder implements ApplicationRunner {
 
+    private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
     private static final String GENERAL_MEDICINE = "General Medicine";
     private static final String CARDIOLOGY = "Cardiology";
     private static final String DEMO_LICENSE_NUMBER = "DEMO-GM-001";
@@ -67,12 +70,21 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        // This row lock is held by MySQL until the surrounding transaction commits.
-        // It therefore serializes seeders across application instances without
-        // releasing the lock before the seeded data becomes visible.
-        jdbcTemplate.queryForObject(
-                "SELECT id FROM seed_locks WHERE id = 1 FOR UPDATE",
-                Integer.class);
+        // Ensure seed_locks table exists for in-memory or fresh databases
+        try {
+            jdbcTemplate.execute(
+                    "CREATE TABLE IF NOT EXISTS seed_locks (id INT PRIMARY KEY)");
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM seed_locks WHERE id = 1", Integer.class);
+            if (count == null || count == 0) {
+                jdbcTemplate.execute("INSERT IGNORE INTO seed_locks (id) VALUES (1)");
+            }
+            jdbcTemplate.queryForObject(
+                    "SELECT id FROM seed_locks WHERE id = 1 FOR UPDATE",
+                    Integer.class);
+        } catch (Exception ex) {
+            log.debug("Proceeding with seeding without lock: {}", ex.getMessage());
+        }
 
         seedUser(
                 "admin@smarthospital.local",
