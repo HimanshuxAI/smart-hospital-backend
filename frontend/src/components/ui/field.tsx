@@ -5,8 +5,8 @@ export type TextFieldProps = Omit<
   "id" | "aria-describedby" | "aria-invalid"
 > & {
   label: string;
-  hint?: string;
-  error?: string;
+  hint?: string | undefined;
+  error?: string | undefined;
 };
 
 export function TextField({
