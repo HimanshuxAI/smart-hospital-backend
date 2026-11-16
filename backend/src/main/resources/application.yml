@@ -26,8 +26,8 @@ spring:
       fail-on-unknown-properties: true
   security:
     user:
-      name: "${SECURITY_USERNAME:admin}"
-      password: "${SECURITY_PASSWORD:admin123}"
+      name: "${SECURITY_USERNAME}"
+      password: "${SECURITY_PASSWORD}"
 
 server:
   port: "${SERVER_PORT:8080}"
@@ -69,7 +69,7 @@ smart-hospital:
     server-url: "${OPENAPI_SERVER_URL:http://localhost:8080}"
   security:
     jwt:
-      secret: "${JWT_SECRET:render-cloud-jwt-secret-very-long-and-secure-hospital-key-1234567890}"
+      secret: "${JWT_SECRET}"
       access-token-expiration: "${JWT_ACCESS_TOKEN_EXPIRATION:PT15M}"
       issuer: "${JWT_ISSUER:smart-hospital-backend}"
     refresh-token:

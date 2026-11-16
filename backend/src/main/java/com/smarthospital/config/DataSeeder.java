@@ -74,10 +74,10 @@ public class DataSeeder implements ApplicationRunner {
         try {
             jdbcTemplate.execute(
                     "CREATE TABLE IF NOT EXISTS seed_locks (id INT PRIMARY KEY)");
-            Integer count = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM seed_locks WHERE id = 1", Integer.class);
-            if (count == null || count == 0) {
-                jdbcTemplate.execute("INSERT IGNORE INTO seed_locks (id) VALUES (1)");
+            try {
+                jdbcTemplate.update("INSERT INTO seed_locks (id) VALUES (1)");
+            } catch (Exception ignored) {
+                // Row already exists or concurrent insert
             }
             jdbcTemplate.queryForObject(
                     "SELECT id FROM seed_locks WHERE id = 1 FOR UPDATE",
