@@ -51,7 +51,12 @@ export function LoginPage() {
         navigate(dest, { replace: true });
       }
     } catch (err: unknown) {
-      const msg = err && typeof err === "object" && "detail" in err ? String((err as { detail: unknown }).detail) : "Invalid email or password";
+      const msg =
+        err && typeof err === "object" && "detail" in err
+          ? String((err as { detail: unknown }).detail)
+          : err instanceof Error
+            ? err.message
+            : "Invalid email or password";
       setGeneralError(msg);
     } finally {
       setLoading(false);

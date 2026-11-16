@@ -42,3 +42,4 @@ smart-hospital:
         - "http://localhost:5173"
         - "http://localhost:5174"
         - "https://smart-hospital-frontend.onrender.com"
+        - "https://smart-hospital-frontend-jqiq.onrender.com"

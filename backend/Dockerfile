@@ -6,7 +6,7 @@ COPY .mvn .mvn
 COPY mvnw .
 RUN chmod +x ./mvnw
 RUN ./mvnw dependency:go-offline -B
-ARG CACHE_BUST=20261116-v3
+ARG CACHE_BUST=20261116-v4
 COPY src ./src
 RUN ./mvnw clean package -DskipTests
 

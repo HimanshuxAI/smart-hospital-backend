@@ -9,7 +9,13 @@ import type {
 } from "./types";
 import { mockAdminDashboard, mockDoctorDashboard, mockPatientDashboard } from "../mocks/data";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+const API_BASE = (
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname.includes("onrender.com")
+    ? "https://smart-hospital-backend-njkt.onrender.com"
+    : "")
+).replace(/\/+$/, "");
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {

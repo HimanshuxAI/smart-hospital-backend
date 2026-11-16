@@ -17,7 +17,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 import type { UserRole } from "../../api/types";
 import { navigationByRole, roleLabels } from "../../lib/constants";
-import { useAuth } from "../../auth/auth-context";
+import { useContext } from "react";
+import { AuthContext } from "../../auth/auth-context";
 
 const icons: Record<string, LucideIcon> = {
   overview: LayoutDashboard,
@@ -32,11 +33,13 @@ const icons: Record<string, LucideIcon> = {
 };
 
 export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () => void }) {
-  const { signOut } = useAuth();
+  const auth = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
+    if (auth?.signOut) {
+      await auth.signOut();
+    }
     navigate("/login", { replace: true });
   };
 
