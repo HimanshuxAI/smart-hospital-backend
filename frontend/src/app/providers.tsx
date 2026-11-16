@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { AuthProvider } from "../auth/AuthProvider";
-import { createDemoAdapter } from "../mocks/adapter";
+import { createHttpAdapter } from "../api/http-adapter";
 import { AppErrorBoundary } from "./error-boundary";
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -18,7 +18,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       })
   );
 
-  const [adapter] = useState(() => createDemoAdapter());
+  const [adapter] = useState(() => createHttpAdapter());
 
   return (
     <AppErrorBoundary>
