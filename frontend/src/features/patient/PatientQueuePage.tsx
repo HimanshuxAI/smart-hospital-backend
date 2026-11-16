@@ -1,6 +1,6 @@
 import { useAuth } from "../../auth/auth-context";
 import { AppShell } from "../../components/layout/AppShell";
-import { Ticket, Clock, CheckCircle2, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { Ticket, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 
 export function PatientQueuePage() {
   const { user } = useAuth();
@@ -9,93 +9,50 @@ export function PatientQueuePage() {
 
   return (
     <AppShell role="PATIENT" user={user}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
         
-        {/* Header */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          paddingBottom: "1.5rem",
-          borderBottom: "1.5px solid var(--color-ink)"
-        }}>
-          <div>
-            <div style={{
-              display: "inline-block",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.75rem",
-              color: "var(--accent-vermilion)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              marginBottom: "0.5rem"
-            }}>
-              [ REAL-TIME TRIAGE // LIVE PASS ]
-            </div>
-            <h1 style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
-              margin: 0,
-              color: "var(--color-ink)",
-              lineHeight: 1.05
-            }}>
-              Queue <em style={{ fontStyle: "italic", color: "var(--accent-vermilion)" }}>Token</em>
-            </h1>
-          </div>
+        <div>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
+            Live Queue Token
+          </h1>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: "0.2rem" }}>
+            Your real-time ticket for today's walk-in and consultation triage.
+          </p>
         </div>
 
-        {/* Big Ticket Display */}
-        <div style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          width: "100%",
-          background: "#ffffff",
-          border: "2.5px solid var(--color-ink)",
-          borderRadius: "8px",
-          padding: "2.5rem",
-          boxShadow: "var(--shadow-hard-lg)",
-          textAlign: "center"
-        }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
-            HOSPITAL ADMISSION TICKET // ACTIVE
-          </div>
+        {/* Big Ticket Banner */}
+        <div className="card-saas" style={{ maxWidth: "560px", margin: "0 auto", width: "100%", textAlign: "center", padding: "2.5rem 2rem" }}>
+          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Admission Token
+          </span>
 
-          <div style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "5.5rem",
-            fontWeight: 800,
-            color: "var(--color-ink)",
-            letterSpacing: "-0.05em",
-            lineHeight: 1,
-            margin: "1rem 0"
-          }}>
+          <div style={{ fontSize: "4.5rem", fontWeight: 800, color: "var(--text-main)", lineHeight: 1.1, margin: "0.75rem 0" }}>
             #T-104
           </div>
 
-          <div style={{
+          <span style={{
             display: "inline-block",
             padding: "0.25rem 0.85rem",
-            border: "1.5px solid var(--color-ink)",
-            background: "var(--accent-wasabi)",
-            borderRadius: "4px",
-            fontFamily: "var(--font-mono)",
+            borderRadius: "9999px",
+            background: "var(--badge-green-bg)",
+            color: "var(--badge-green-text)",
+            border: "1px solid var(--badge-green-border)",
             fontSize: "0.8rem",
-            fontWeight: 700,
-            textTransform: "uppercase",
+            fontWeight: 600,
             marginBottom: "2rem"
           }}>
-            TRIAGE PRIORITY: NORMAL (LEVEL 3)
-          </div>
+            Status: Priority 3 (Normal Triage)
+          </span>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", textAlign: "left" }}>
-            <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--bg-canvas)" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)" }}>WAITING IN FRONT</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 800 }}>2 Patients</div>
+            <div style={{ padding: "1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Ahead of you</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--text-main)", marginTop: "0.2rem" }}>2 Patients</div>
             </div>
 
-            <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--accent-vermilion-soft)" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--accent-vermilion)", fontWeight: 700 }}>ML ESTIMATED TIME</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 800, color: "var(--accent-vermilion)" }}>~12 mins</div>
+            <div style={{ padding: "1rem", background: "var(--primary-subtle)", borderRadius: "8px", border: "1px solid #bae6fd" }}>
+              <div style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: 600 }}>Estimated Wait</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--primary)", marginTop: "0.2rem" }}>~12 mins</div>
             </div>
           </div>
         </div>

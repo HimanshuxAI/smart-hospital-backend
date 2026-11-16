@@ -9,94 +9,51 @@ export function PatientAppointmentsPage() {
 
   return (
     <AppShell role="PATIENT" user={user}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
         
-        {/* Header */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          paddingBottom: "1.5rem",
-          borderBottom: "1.5px solid var(--color-ink)"
-        }}>
-          <div>
-            <div style={{
-              display: "inline-block",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.75rem",
-              color: "var(--accent-vermilion)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              marginBottom: "0.5rem"
-            }}>
-              [ PATIENT RECORDS // SCHEDULED VISITS ]
-            </div>
-            <h1 style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
-              margin: 0,
-              color: "var(--color-ink)",
-              lineHeight: 1.05
-            }}>
-              My <em style={{ fontStyle: "italic", color: "var(--accent-vermilion)" }}>Appointments</em>
-            </h1>
-          </div>
+        <div>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
+            My Appointments
+          </h1>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: "0.2rem" }}>
+            View and manage your scheduled doctor consultations.
+          </p>
         </div>
 
-        {/* Appointment List */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <div style={{
-            background: "#ffffff",
-            border: "2px solid var(--color-ink)",
-            borderRadius: "8px",
-            padding: "2rem",
-            boxShadow: "var(--shadow-hard-md)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "1.5rem"
-          }}>
-            <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-              <div style={{
-                width: "3.5rem",
-                height: "3.5rem",
-                border: "1.5px solid var(--color-ink)",
-                borderRadius: "6px",
-                background: "var(--accent-wasabi)",
-                display: "grid",
-                placeItems: "center",
-                boxShadow: "2px 2px 0px var(--color-ink)"
-              }}>
-                <Calendar size={24} color="var(--color-ink)" />
-              </div>
-              <div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--accent-vermilion)", fontWeight: 700, textTransform: "uppercase" }}>
-                  CARDIOVASCULAR MEDICINE // CONFIRMED
+        {/* Appointment Card */}
+        <div className="card-saas" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1.25rem" }}>
+          <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+            <div style={{ width: "3rem", height: "3rem", borderRadius: "10px", background: "var(--badge-green-bg)", color: "var(--badge-green-text)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Calendar size={22} />
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.2rem" }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--primary)", textTransform: "uppercase" }}>Cardiology</span>
+                <span style={{ fontSize: "0.75rem", padding: "0.15rem 0.5rem", borderRadius: "9999px", background: "var(--badge-green-bg)", color: "var(--badge-green-text)", fontWeight: 600 }}>
+                  Confirmed
                 </span>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.35rem", fontWeight: 800, margin: "0.2rem 0", color: "var(--color-ink)" }}>
-                  Dr. Sarah Jenkins, MD
-                </h2>
-                <div style={{ display: "flex", gap: "1.25rem", color: "var(--color-muted)", fontSize: "0.85rem" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                    <Clock size={15} /> Tomorrow at 10:30 AM
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                    <MapPin size={15} /> Clinic Room 4B
-                  </span>
-                </div>
+              </div>
+              <h2 style={{ fontSize: "1.15rem", fontWeight: 700, color: "var(--text-main)" }}>
+                Dr. Sarah Jenkins, MD
+              </h2>
+              <div style={{ display: "flex", gap: "1.25rem", color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                  <Clock size={14} /> Tomorrow at 10:30 AM
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                  <MapPin size={14} /> Room 4B
+                </span>
               </div>
             </div>
+          </div>
 
-            <div style={{ display: "flex", gap: "0.75rem" }}>
-              <button type="button" className="button button-secondary">
-                Reschedule
-              </button>
-              <button type="button" className="button button-primary">
-                Check In Now
-              </button>
-            </div>
+          <div style={{ display: "flex", gap: "0.75rem" }}>
+            <button type="button" className="button button-secondary">
+              Reschedule
+            </button>
+            <button type="button" className="button button-primary">
+              Check-In Now
+            </button>
           </div>
         </div>
       </div>

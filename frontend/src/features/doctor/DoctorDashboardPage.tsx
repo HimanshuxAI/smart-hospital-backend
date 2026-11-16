@@ -5,10 +5,10 @@ import {
   Users, 
   Clock, 
   Activity, 
-  ArrowUpRight, 
+  CalendarCheck, 
+  ChevronRight, 
   Stethoscope,
-  Terminal,
-  ChevronRight
+  ArrowRight
 } from "lucide-react";
 
 export function DoctorDashboardPage() {
@@ -20,164 +20,86 @@ export function DoctorDashboardPage() {
 
   return (
     <AppShell role="DOCTOR" user={user} demoMode={isDemo}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
         
         {/* Header */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          gap: "1.5rem",
-          paddingBottom: "1.5rem",
-          borderBottom: "1.5px solid var(--color-ink)"
-        }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem" }}>
           <div>
-            <div style={{
-              display: "inline-block",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.75rem",
-              color: "var(--accent-vermilion)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              marginBottom: "0.5rem"
-            }}>
-              [ CLINICAL STATION // DR. CONSOLE ]
-            </div>
-            <h1 style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
-              margin: 0,
-              color: "var(--color-ink)",
-              lineHeight: 1.05
-            }}>
-              Station — <em style={{ fontStyle: "italic", color: "var(--accent-vermilion)" }}>{data.doctorName}</em>
+            <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
+              Doctor Station — {data.doctorName}
             </h1>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: "0.2rem" }}>
+              Manage today's clinical consultation queue and patient flow.
+            </p>
           </div>
 
-          <button type="button" className="button button-primary" style={{ padding: "0.75rem 1.75rem" }}>
-            <Users size={18} />
-            <span>CALL NEXT TICKET</span>
-            <ArrowUpRight size={18} />
+          <button type="button" className="button button-primary">
+            <Users size={16} />
+            <span>Call Next Patient</span>
+            <ArrowRight size={16} />
           </button>
         </div>
 
-        {/* 3 Physical KPI Blocks */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.5rem" }}>
+        {/* 3 Metric Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem" }}>
           
-          <div style={{
-            background: "#ffffff",
-            border: "2px solid var(--color-ink)",
-            borderRadius: "8px",
-            padding: "1.75rem",
-            boxShadow: "var(--shadow-hard-md)"
-          }}>
+          <div className="card-saas">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
-                // TODAY'S APPOINTMENTS
-              </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)" }}>[01]</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "var(--text-muted)" }}>Appointments Today</span>
+              <div style={{ width: "2rem", height: "2rem", borderRadius: "6px", background: "var(--bg-subtle)", color: "var(--text-main)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <CalendarCheck size={16} />
+              </div>
             </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3.5rem", fontWeight: 800, color: "var(--color-ink)", margin: "0.5rem 0 0.25rem", letterSpacing: "-0.04em" }}>
+            <div style={{ fontSize: "2.25rem", fontWeight: 700, color: "var(--text-main)", marginTop: "0.75rem" }}>
               {data.todayAppointmentCount}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "var(--color-muted)" }}>
-              CONFIRMED CALENDAR SLOTS
-            </div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Scheduled on calendar</span>
           </div>
 
-          <div style={{
-            background: "var(--accent-vermilion-soft)",
-            border: "2px solid var(--color-ink)",
-            borderRadius: "8px",
-            padding: "1.75rem",
-            boxShadow: "var(--shadow-hard-md)"
-          }}>
+          <div className="card-saas">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--accent-vermilion)", textTransform: "uppercase" }}>
-                // PATIENTS WAITING
-              </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--accent-vermilion)" }}>[02]</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "var(--text-muted)" }}>Patients Waiting</span>
+              <div style={{ width: "2rem", height: "2rem", borderRadius: "6px", background: "var(--badge-orange-bg)", color: "var(--badge-orange-text)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Clock size={16} />
+              </div>
             </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3.5rem", fontWeight: 800, color: "var(--accent-vermilion)", margin: "0.5rem 0 0.25rem", letterSpacing: "-0.04em" }}>
+            <div style={{ fontSize: "2.25rem", fontWeight: 700, color: "var(--badge-orange-text)", marginTop: "0.75rem" }}>
               {data.waitingCount}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "var(--accent-vermilion)", fontWeight: 700 }}>
-              PRIORITIZED VIA ML ENGINE
-            </div>
+            <span style={{ fontSize: "0.75rem", color: "var(--badge-orange-text)", fontWeight: 500 }}>In waiting area</span>
           </div>
 
-          <div style={{
-            background: "#ffffff",
-            border: "2px solid var(--color-ink)",
-            borderRadius: "8px",
-            padding: "1.75rem",
-            boxShadow: "var(--shadow-hard-md)"
-          }}>
+          <div className="card-saas">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
-                // IN CONSULTATION
-              </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)" }}>[03]</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "var(--text-muted)" }}>In Consultation</span>
+              <div style={{ width: "2rem", height: "2rem", borderRadius: "6px", background: "var(--primary-subtle)", color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Activity size={16} />
+              </div>
             </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3.5rem", fontWeight: 800, color: "var(--color-ink)", margin: "0.5rem 0 0.25rem", letterSpacing: "-0.04em" }}>
+            <div style={{ fontSize: "2.25rem", fontWeight: 700, color: "var(--primary)", marginTop: "0.75rem" }}>
               {data.inConsultationCount}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "var(--color-muted)" }}>
-              ACTIVE CLINICAL EXAM
-            </div>
+            <span style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: 500 }}>Active examination</span>
           </div>
         </div>
 
-        {/* Workflow Card */}
-        <div style={{
-          background: "#ffffff",
-          border: "2px solid var(--color-ink)",
-          borderRadius: "8px",
-          padding: "2rem",
-          boxShadow: "var(--shadow-hard-md)"
-        }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingBottom: "1rem",
-            marginBottom: "1.5rem",
-            borderBottom: "1.5px dashed var(--color-border)"
-          }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
-              OPERATING PROTOCOL // INTAKE PIPELINE
-            </span>
-            <Terminal size={18} />
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
-            <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--bg-canvas)" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, marginBottom: "0.4rem" }}>
-                [STEP 01] TRIAGE ARRIVAL
-              </div>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-ink-subtle)" }}>
-                Patient check-in feeds directly into Python scikit-learn models to calculate real-time queue sorting.
-              </p>
+        {/* Workflow card */}
+        <div className="card-saas">
+          <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-main)", marginBottom: "1rem" }}>
+            Patient Flow Guidelines
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
+            <div style={{ padding: "1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-main)", marginBottom: "0.25rem" }}>1. Triage & Sorting</div>
+              <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", margin: 0 }}>Patients are ordered automatically using machine learning triage priority weights.</p>
             </div>
-
-            <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--bg-canvas)" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, marginBottom: "0.4rem" }}>
-                [STEP 02] PESSIMISTIC LOCKING
-              </div>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-ink-subtle)" }}>
-                Consultation room summons utilize MySQL database-level locks, guaranteeing zero double-calls.
-              </p>
+            <div style={{ padding: "1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-main)", marginBottom: "0.25rem" }}>2. Call to Station</div>
+              <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", margin: 0 }}>Clicking "Call Next Patient" broadcasts the notification to public monitors.</p>
             </div>
-
-            <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--bg-canvas)" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, marginBottom: "0.4rem" }}>
-                [STEP 03] DISPATCH COMPLETION
-              </div>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-ink-subtle)" }}>
-                Release station updates the hospital display board and triggers waiting time re-estimations.
-              </p>
+            <div style={{ padding: "1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-main)", marginBottom: "0.25rem" }}>3. Finish Visit</div>
+              <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", margin: 0 }}>Complete the consultation note to clear the queue slot and free capacity.</p>
             </div>
           </div>
         </div>

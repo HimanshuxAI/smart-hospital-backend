@@ -7,9 +7,8 @@ import {
   Building2, 
   CalendarDays, 
   Activity, 
-  Terminal,
-  Cpu,
-  Database
+  Database,
+  CheckCircle2
 } from "lucide-react";
 
 export function AdminDashboardPage() {
@@ -21,154 +20,101 @@ export function AdminDashboardPage() {
 
   return (
     <AppShell role="ADMIN" user={user} demoMode={isDemo}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
         
         {/* Header */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          gap: "1.5rem",
-          paddingBottom: "1.5rem",
-          borderBottom: "1.5px solid var(--color-ink)"
-        }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem" }}>
           <div>
-            <div style={{
-              display: "inline-block",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.75rem",
-              color: "var(--accent-vermilion)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              marginBottom: "0.5rem"
-            }}>
-              [ ROOT SYSTEM TELEMETRY // FACILITY CONTROL ]
-            </div>
-            <h1 style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
-              margin: 0,
-              color: "var(--color-ink)",
-              lineHeight: 1.05
-            }}>
-              Infrastructure Core
+            <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
+              Hospital Operations
             </h1>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: "0.2rem" }}>
+              Facility performance metrics, active staffing, and clinical capacity.
+            </p>
           </div>
 
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            <span style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.4rem 0.85rem",
-              background: "#ffffff",
-              border: "1.5px solid var(--color-ink)",
-              borderRadius: "4px",
-              boxShadow: "var(--shadow-hard-xs)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.75rem",
-              fontWeight: 700
-            }}>
-              <Database size={15} color="var(--accent-vermilion)" />
-              MYSQL 8.4 CONNECTED
-            </span>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.4rem 0.85rem",
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "6px",
+            fontSize: "0.8rem",
+            fontWeight: 500,
+            color: "var(--text-main)"
+          }}>
+            <Database size={15} color="var(--primary)" />
+            <span>Database: MySQL 8.4 Online</span>
           </div>
         </div>
 
-        {/* Dense Architectural Numbers Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "1.25rem" }}>
+        {/* 5 Stats Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
           
-          <div style={{ background: "#ffffff", border: "2px solid var(--color-ink)", borderRadius: "8px", padding: "1.5rem", boxShadow: "var(--shadow-hard-sm)" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
-              // TOTAL IDENTITIES
-            </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: 800, color: "var(--color-ink)", margin: "0.25rem 0" }}>
+          <div className="card-saas">
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500 }}>Total Users</span>
+            <div style={{ fontSize: "2rem", fontWeight: 700, color: "var(--text-main)", margin: "0.35rem 0" }}>
               {data.totalUsers}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)" }}>Active profiles</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Registered accounts</span>
           </div>
 
-          <div style={{ background: "#ffffff", border: "2px solid var(--color-ink)", borderRadius: "8px", padding: "1.5rem", boxShadow: "var(--shadow-hard-sm)" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
-              // ACTIVE DOCTORS
-            </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: 800, color: "var(--color-ink)", margin: "0.25rem 0" }}>
+          <div className="card-saas">
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500 }}>Active Doctors</span>
+            <div style={{ fontSize: "2rem", fontWeight: 700, color: "var(--text-main)", margin: "0.35rem 0" }}>
               {data.totalDoctors}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)" }}>Stations staffed</div>
+            <span style={{ fontSize: "0.75rem", color: "#16a34a", fontWeight: 500 }}>On duty today</span>
           </div>
 
-          <div style={{ background: "#ffffff", border: "2px solid var(--color-ink)", borderRadius: "8px", padding: "1.5rem", boxShadow: "var(--shadow-hard-sm)" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
-              // CLINICAL DEPTS
-            </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: 800, color: "var(--color-ink)", margin: "0.25rem 0" }}>
+          <div className="card-saas">
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500 }}>Departments</span>
+            <div style={{ fontSize: "2rem", fontWeight: 700, color: "var(--text-main)", margin: "0.35rem 0" }}>
               {data.totalDepartments}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)" }}>Operational units</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Clinical units</span>
           </div>
 
-          <div style={{ background: "#ffffff", border: "2px solid var(--color-ink)", borderRadius: "8px", padding: "1.5rem", boxShadow: "var(--shadow-hard-sm)" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
-              // TODAY'S BOOKINGS
-            </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: 800, color: "var(--color-ink)", margin: "0.25rem 0" }}>
+          <div className="card-saas">
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500 }}>Appointments</span>
+            <div style={{ fontSize: "2rem", fontWeight: 700, color: "var(--text-main)", margin: "0.35rem 0" }}>
               {data.appointmentsToday}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)" }}>Concurrency passed</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: 500 }}>Booked today</span>
           </div>
 
-          <div style={{ background: "var(--accent-vermilion-soft)", border: "2px solid var(--color-ink)", borderRadius: "8px", padding: "1.5rem", boxShadow: "var(--shadow-hard-sm)" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--accent-vermilion)", fontWeight: 700, textTransform: "uppercase" }}>
-              // QUEUED TICKETS
-            </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "3rem", fontWeight: 800, color: "var(--accent-vermilion)", margin: "0.25rem 0" }}>
+          <div className="card-saas">
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500 }}>Queue Today</span>
+            <div style={{ fontSize: "2rem", fontWeight: 700, color: "var(--badge-orange-text)", margin: "0.35rem 0" }}>
               {data.queueEntriesToday}
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--accent-vermilion)" }}>Live admission flow</div>
+            <span style={{ fontSize: "0.75rem", color: "var(--badge-orange-text)", fontWeight: 500 }}>Total patients processed</span>
           </div>
         </div>
 
-        {/* Engine Diagnostics Panel */}
-        <div style={{
-          background: "#ffffff",
-          border: "2px solid var(--color-ink)",
-          borderRadius: "8px",
-          padding: "2rem",
-          boxShadow: "var(--shadow-hard-md)"
-        }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingBottom: "1rem",
-            marginBottom: "1.5rem",
-            borderBottom: "1.5px dashed var(--color-border)"
-          }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
-              SYSTEM ARCHITECTURE TELEMETRY
-            </span>
-            <Cpu size={18} />
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
-            <div style={{ padding: "1.5rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--bg-canvas)" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem", fontWeight: 700, marginBottom: "0.4rem", color: "var(--color-ink)" }}>
-                [ENGINE] ML FASTAPI INFERENCE SERVER
+        {/* System Health */}
+        <div className="card-saas">
+          <h2 style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-main)", marginBottom: "1rem" }}>
+            Connected Services
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
+            <div style={{ padding: "1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: "#16a34a", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
+                <span className="status-dot" /> Spring Boot Core API (8080)
               </div>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-ink-subtle)", lineHeight: 1.6 }}>
-                Port 8000 listening. RandomForestRegressor models calibrated on patient volume, emergency severity indices, and departmental backlog.
+              <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", margin: 0 }}>
+                JWT authentication, appointment scheduling, and pessimistic row locking operational.
               </p>
             </div>
 
-            <div style={{ padding: "1.5rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--bg-canvas)" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem", fontWeight: 700, marginBottom: "0.4rem", color: "var(--color-ink)" }}>
-                [ENGINE] SPRING BOOT CONCURRENCY GUARANTEE
+            <div style={{ padding: "1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: "#16a34a", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
+                <span className="status-dot" /> ML Waiting Time Predictor (8000)
               </div>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-ink-subtle)", lineHeight: 1.6 }}>
-                Port 8080 running. JPA Pessimistic write locks with Flyway versioned schemas ensuring deterministic zero-collision slot bookings.
+              <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", margin: 0 }}>
+                FastAPI microservice loaded with random forest regression models for dynamic queue estimation.
               </p>
             </div>
           </div>
