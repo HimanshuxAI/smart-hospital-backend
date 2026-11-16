@@ -20,14 +20,18 @@ services:
     autoDeploy: true
     envVars:
       - key: SPRING_PROFILES_ACTIVE
-        value: prod
+        value: local
+      - key: APP_SEED_ENABLED
+        value: "true"
+      - key: SERVER_PORT
+        value: "8080"
       - key: ML_SERVICE_URL
         fromService:
           type: web
           name: smart-hospital-ml
           property: host
 
-  # 3. React Frontend (Static Site - static sites in Render are always free and do not take a plan attribute)
+  # 3. React Frontend (Static Site)
   - type: web
     name: smart-hospital-frontend
     env: static
