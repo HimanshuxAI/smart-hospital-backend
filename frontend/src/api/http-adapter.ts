@@ -9,7 +9,7 @@ import type {
 } from "./types";
 import { mockAdminDashboard, mockDoctorDashboard, mockPatientDashboard } from "../mocks/data";
 
-const API_BASE = "";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
