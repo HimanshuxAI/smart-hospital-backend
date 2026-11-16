@@ -1,17 +1,17 @@
 import { useAuth } from "../../auth/auth-context";
 import { AppShell } from "../../components/layout/AppShell";
+import { PriorityBadge } from "../queue/PriorityBadge";
 import { mockPatientDashboard } from "../../mocks/data";
-import { Link } from "react-router-dom";
 import { 
   Calendar, 
   Clock, 
   MapPin, 
   Ticket, 
+  ArrowUpRight, 
   User, 
-  ArrowRight,
+  CheckCircle2, 
   Activity,
-  CheckCircle2,
-  CalendarCheck
+  Layers
 } from "lucide-react";
 
 export function PatientDashboardPage() {
@@ -23,127 +23,203 @@ export function PatientDashboardPage() {
 
   return (
     <AppShell role="PATIENT" user={user} demoMode={isDemo}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
         
-        {/* Welcome Section */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem" }}>
+        {/* Editorial Greeting Header */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          flexWrap: "wrap",
+          gap: "1.5rem",
+          paddingBottom: "1.5rem",
+          borderBottom: "1.5px solid var(--color-ink)"
+        }}>
           <div>
-            <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
-              Welcome, {data.patientName}
+            <div style={{
+              display: "inline-block",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.75rem",
+              color: "var(--accent-vermilion)",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              marginBottom: "0.5rem"
+            }}>
+              [ PATIENT PORTAL // LIVE STATUS ]
+            </div>
+            <h1 style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
+              margin: 0,
+              color: "var(--color-ink)",
+              lineHeight: 1.05
+            }}>
+              Good day, <em style={{ fontStyle: "italic", color: "var(--accent-vermilion)" }}>{data.patientName}</em>.
             </h1>
-            <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: "0.2rem" }}>
-              Here is your healthcare schedule and current queue status.
-            </p>
           </div>
 
-          <Link to="/patient/doctors" className="button button-primary">
-            <span>Book Appointment</span>
-            <ArrowRight size={16} />
-          </Link>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.5rem 1rem",
+            background: "#ffffff",
+            border: "1.5px solid var(--color-ink)",
+            borderRadius: "4px",
+            boxShadow: "var(--shadow-hard-xs)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.78rem",
+            fontWeight: 700
+          }}>
+            <span className="status-dot" /> ACTIVE DISPATCH ONLINE
+          </div>
         </div>
 
-        {/* 2 Main Cards: Upcoming Appointment & Live Queue */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "1.5rem" }}>
+        {/* Tactile Asymmetric Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "2rem" }}>
           
-          {/* Active Queue Ticket Card */}
-          <div className="card-saas" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          {/* Active Live Ticket Board */}
+          <div style={{
+            background: "#ffffff",
+            border: "2px solid var(--color-ink)",
+            borderRadius: "8px",
+            padding: "2rem",
+            boxShadow: "var(--shadow-hard-md)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between"
+          }}>
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                  <div style={{ width: "2rem", height: "2rem", borderRadius: "6px", background: "var(--primary-subtle)", color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Ticket size={17} />
-                  </div>
-                  <h2 style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--text-main)" }}>Live Queue Ticket</h2>
-                </div>
-                
-                {data.activeQueueEntry && (
-                  <span style={{
-                    padding: "0.2rem 0.65rem",
-                    borderRadius: "9999px",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    background: "var(--badge-orange-bg)",
-                    color: "var(--badge-orange-text)",
-                    border: "1px solid var(--badge-orange-border)"
-                  }}>
-                    {data.activeQueueEntry.triageLevel} Priority
-                  </span>
-                )}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingBottom: "1rem",
+                marginBottom: "1.5rem",
+                borderBottom: "1.5px dashed var(--color-border)"
+              }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
+                  // LIVE QUEUE ADMISSION
+                </span>
+                {data.activeQueueEntry && <PriorityBadge tier={data.activeQueueEntry.triageLevel} />}
               </div>
 
               {data.activeQueueEntry ? (
                 <div>
+                  {/* Huge Raw Ticket Block */}
                   <div style={{
-                    background: "var(--bg-subtle)",
-                    borderRadius: "10px",
-                    padding: "1.5rem",
+                    background: "var(--bg-canvas)",
+                    border: "1.5px solid var(--color-ink)",
+                    borderRadius: "4px",
+                    padding: "1.75rem",
                     textAlign: "center",
-                    border: "1px solid var(--border-color)",
-                    marginBottom: "1.25rem"
+                    marginBottom: "1.5rem"
                   }}>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                      Queue Token
-                    </span>
-                    <div style={{ fontSize: "3rem", fontWeight: 800, color: "var(--text-main)", lineHeight: 1.1, margin: "0.25rem 0" }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
+                      QUEUED TOKEN IDENTIFIER
+                    </div>
+                    <div style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "3.75rem",
+                      fontWeight: 800,
+                      color: "var(--color-ink)",
+                      lineHeight: 1.1,
+                      letterSpacing: "-0.04em",
+                      margin: "0.25rem 0"
+                    }}>
                       #{data.activeQueueEntry.tokenNumber}
                     </div>
-                    <span style={{ fontSize: "0.8rem", color: "#16a34a", fontWeight: 600 }}>
-                      ● {data.activeQueueEntry.queueStatus}
-                    </span>
+                    <div style={{
+                      display: "inline-block",
+                      padding: "0.2rem 0.65rem",
+                      border: "1px solid var(--color-ink)",
+                      background: "var(--accent-wasabi)",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      marginTop: "0.5rem"
+                    }}>
+                      STATUS: {data.activeQueueEntry.queueStatus}
+                    </div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-                    <div style={{ padding: "0.85rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500 }}>Ahead of you</div>
-                      <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text-main)", marginTop: "0.15rem" }}>
-                        {data.activeQueueEntry.position} patients
+                  {/* Dual Metrics */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                    <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "#ffffff" }}>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
+                        POSITION IN LINE
                       </div>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 800, color: "var(--color-ink)" }}>
+                        {data.activeQueueEntry.position}
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--color-muted)" }}>patients ahead</div>
                     </div>
 
-                    <div style={{ padding: "0.85rem", background: "var(--primary-subtle)", borderRadius: "8px", border: "1px solid #bae6fd" }}>
-                      <div style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: 600 }}>Est. Wait Time</div>
-                      <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--primary)", marginTop: "0.15rem" }}>
-                        ~{data.activeQueueEntry.estimatedWaitMinutes} mins
+                    <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--accent-vermilion-soft)" }}>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--accent-vermilion)", fontWeight: 700, textTransform: "uppercase" }}>
+                        ML ESTIMATED WAIT
                       </div>
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 800, color: "var(--accent-vermilion)" }}>
+                        ~{data.activeQueueEntry.estimatedWaitMinutes}m
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--accent-vermilion)", fontWeight: 600 }}>regressor active</div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ padding: "3rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
-                  <CheckCircle2 size={36} color="#10b981" style={{ margin: "0 auto 0.75rem", opacity: 0.8 }} />
-                  <p style={{ fontSize: "0.9rem" }}>No active queue token. Check in to join.</p>
+                <div style={{ padding: "3rem 1rem", textAlign: "center", color: "var(--color-muted)" }}>
+                  <Ticket size={40} style={{ margin: "0 auto 1rem", strokeWidth: 1.5 }} />
+                  <p style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 700 }}>No active queue token found.</p>
                 </div>
               )}
             </div>
 
-            <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Auto-refreshes in real-time</span>
-              <Link to="/patient/queue" style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--primary)", textDecoration: "none" }}>
-                View Full Pass →
-              </Link>
+            <div style={{
+              marginTop: "2rem",
+              paddingTop: "1.25rem",
+              borderTop: "1.5px dashed var(--color-border)",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.72rem",
+              color: "var(--color-muted)"
+            }}>
+              DATA REFRESH: REALTIME WEBSOCKET STREAM
             </div>
           </div>
 
-          {/* Upcoming Appointment Card */}
-          <div className="card-saas" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          {/* Upcoming Consultation */}
+          <div style={{
+            background: "#ffffff",
+            border: "2px solid var(--color-ink)",
+            borderRadius: "8px",
+            padding: "2rem",
+            boxShadow: "var(--shadow-hard-md)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between"
+          }}>
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                  <div style={{ width: "2rem", height: "2rem", borderRadius: "6px", background: "#f0fdf4", color: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Calendar size={17} />
-                  </div>
-                  <h2 style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--text-main)" }}>Next Appointment</h2>
-                </div>
-
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingBottom: "1rem",
+                marginBottom: "1.5rem",
+                borderBottom: "1.5px dashed var(--color-border)"
+              }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
+                  // CLINICAL SCHEDULE
+                </span>
                 {data.upcomingAppointment && (
                   <span style={{
-                    padding: "0.2rem 0.65rem",
-                    borderRadius: "9999px",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    background: "var(--badge-green-bg)",
-                    color: "var(--badge-green-text)",
-                    border: "1px solid var(--badge-green-border)"
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "0.72rem",
+                    padding: "0.15rem 0.6rem",
+                    border: "1px solid var(--color-ink)",
+                    background: "var(--accent-wasabi)",
+                    fontWeight: 700,
+                    textTransform: "uppercase"
                   }}>
                     {data.upcomingAppointment.status}
                   </span>
@@ -151,44 +227,51 @@ export function PatientDashboardPage() {
               </div>
 
               {data.upcomingAppointment ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-                  <div style={{ padding: "0.85rem 1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Doctor</div>
-                    <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--text-main)", marginTop: "0.15rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px" }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
+                      ATTENDING PHYSICIAN
+                    </div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 800, color: "var(--color-ink)", marginTop: "0.25rem" }}>
                       {data.upcomingAppointment.doctorName}
                     </div>
                   </div>
 
-                  <div style={{ padding: "0.85rem 1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Department</div>
-                    <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--text-main)", marginTop: "0.15rem" }}>
+                  <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px" }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
+                      DEPARTMENT
+                    </div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 800, color: "var(--color-ink)", marginTop: "0.25rem" }}>
                       {data.upcomingAppointment.departmentName}
                     </div>
                   </div>
 
-                  <div style={{ padding: "0.85rem 1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-                    <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Date & Time</div>
-                    <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--text-main)", marginTop: "0.15rem" }}>
-                      {new Date(data.upcomingAppointment.startsAt).toLocaleString(undefined, {
-                        dateStyle: "medium",
-                        timeStyle: "short"
-                      })}
+                  <div style={{ padding: "1.25rem", border: "1.5px solid var(--color-ink)", borderRadius: "4px", background: "var(--bg-canvas)" }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
+                      SCHEDULED APPOINTMENT TIME
+                    </div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "1.1rem", fontWeight: 700, color: "var(--color-ink)", marginTop: "0.25rem" }}>
+                      {new Date(data.upcomingAppointment.startsAt).toLocaleString()}
                     </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ padding: "3rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
-                  <CalendarCheck size={36} color="var(--text-light)" style={{ margin: "0 auto 0.75rem" }} />
-                  <p style={{ fontSize: "0.9rem" }}>No upcoming appointments scheduled.</p>
+                <div style={{ padding: "3rem 1rem", textAlign: "center", color: "var(--color-muted)" }}>
+                  <Calendar size={40} style={{ margin: "0 auto 1rem", strokeWidth: 1.5 }} />
+                  <p style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 700 }}>No bookings on record.</p>
                 </div>
               )}
             </div>
 
-            <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Confirmed visit</span>
-              <Link to="/patient/appointments" style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--primary)", textDecoration: "none" }}>
-                All Appointments →
-              </Link>
+            <div style={{ marginTop: "2rem", paddingTop: "1.25rem", borderTop: "1.5px dashed var(--color-border)" }}>
+              <button
+                type="button"
+                className="button button-primary"
+                style={{ width: "100%", justifyContent: "space-between" }}
+              >
+                <span>BOOK NEW SLOT</span>
+                <ArrowUpRight size={18} />
+              </button>
             </div>
           </div>
         </div>

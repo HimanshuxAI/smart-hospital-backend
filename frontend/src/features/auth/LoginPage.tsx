@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HeartPulse, ArrowRight, ShieldCheck, Stethoscope, User } from "lucide-react";
+import { ArrowUpRight, Zap, Shield, Key, Stethoscope, User, Fingerprint } from "lucide-react";
 import { useAuth } from "../../auth/auth-context";
 import { validateEmail, validatePassword } from "../../lib/validation";
 
@@ -61,190 +61,371 @@ export function LoginPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "var(--bg-page)",
+      background: "var(--bg-canvas)",
       display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "2rem 1rem"
+      flexDirection: "column",
+      justifyContent: "space-between",
+      padding: "2rem clamp(1.5rem, 5vw, 4rem)",
+      fontFamily: "var(--font-body)"
     }}>
-      <div style={{
-        width: "100%",
-        maxWidth: "400px",
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border-color)",
-        borderRadius: "var(--radius-lg)",
-        padding: "2.25rem 2rem",
-        boxShadow: "var(--shadow-card)"
+      {/* Top Architectural Header Strip */}
+      <header style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingBottom: "1.5rem",
+        borderBottom: "1.5px solid var(--color-ink)"
       }}>
-        {/* Brand header */}
-        <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <div style={{
-            width: "2.75rem",
-            height: "2.75rem",
-            margin: "0 auto 0.75rem",
-            borderRadius: "var(--radius-md)",
-            background: "linear-gradient(135deg, #0284c7, #0ea5e9)",
-            color: "white",
-            display: "flex",
+            width: "2.25rem",
+            height: "2.25rem",
+            background: "var(--color-ink)",
+            color: "var(--bg-canvas)",
+            display: "grid",
+            placeItems: "center",
+            fontWeight: 800,
+            fontSize: "1rem",
+            fontFamily: "var(--font-display)",
+            borderRadius: "4px"
+          }}>
+            Æ
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
+              AEGLE CLINICAL OS
+            </div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
+              SYS.ID: TOKYO-MED-992 // RUNNING
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <span style={{
+            display: "inline-flex",
             alignItems: "center",
-            justifyContent: "center"
+            gap: "0.4rem",
+            padding: "0.25rem 0.65rem",
+            border: "1.5px solid var(--color-ink)",
+            background: "var(--accent-wasabi)",
+            borderRadius: "3px",
+            fontSize: "0.7rem",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+            boxShadow: "2px 2px 0px var(--color-ink)"
           }}>
-            <HeartPulse size={22} />
-          </div>
-          <h1 style={{ fontSize: "1.35rem", fontWeight: 700, color: "var(--text-main)" }}>
-            Smart Hospital
-          </h1>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "0.2rem" }}>
-            Sign in to access your clinical dashboard
-          </p>
-        </div>
-
-        {generalError && (
-          <div role="alert" style={{
-            padding: "0.75rem",
-            marginBottom: "1.25rem",
-            borderRadius: "var(--radius-sm)",
-            background: "var(--badge-red-bg)",
-            border: "1px solid var(--badge-red-border)",
-            color: "var(--badge-red-text)",
-            fontSize: "0.85rem"
-          }}>
-            {generalError}
-          </div>
-        )}
-
-        <form noValidate onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "var(--text-main)", marginBottom: "0.3rem" }}>
-              Email address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@smarthospital.local"
-              autoComplete="email"
-              required
-              className="field-control"
-            />
-            {fieldErrors.email && (
-              <span style={{ fontSize: "0.75rem", color: "#e11d48", marginTop: "0.25rem", display: "block" }}>
-                {fieldErrors.email}
-              </span>
-            )}
-          </div>
-
-          <div>
-            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "var(--text-main)", marginBottom: "0.3rem" }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              autoComplete="current-password"
-              required
-              className="field-control"
-            />
-            {fieldErrors.password && (
-              <span style={{ fontSize: "0.75rem", color: "#e11d48", marginTop: "0.25rem", display: "block" }}>
-                {fieldErrors.password}
-              </span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="button button-primary"
-            style={{ width: "100%", height: "2.75rem", marginTop: "0.5rem" }}
+            <span className="status-dot" /> LIVE ENGINE
+          </span>
+          <Link
+            to="/register"
+            style={{
+              padding: "0.35rem 0.85rem",
+              border: "1.5px solid var(--color-ink)",
+              borderRadius: "3px",
+              background: "#ffffff",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              fontFamily: "var(--font-display)",
+              color: "var(--color-ink)",
+              boxShadow: "2px 2px 0px var(--color-ink)"
+            }}
           >
-            {loading ? "Signing in..." : <>Sign In <ArrowRight size={16} /></>}
-          </button>
-        </form>
-
-        {/* Demo Fast Autofill */}
-        <div style={{ marginTop: "1.75rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-color)" }}>
-          <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.6rem", textAlign: "center" }}>
-            Quick Demo Accounts
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.4rem" }}>
-            <button
-              type="button"
-              onClick={() => fillCredentials("admin@smarthospital.local", "Admin@123")}
-              style={{
-                background: "var(--bg-subtle)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "var(--radius-sm)",
-                padding: "0.5rem 0.2rem",
-                color: "var(--text-main)",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.2rem"
-              }}
-            >
-              <ShieldCheck size={15} color="var(--primary)" />
-              <span>Admin</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => fillCredentials("doctor@smarthospital.local", "Doctor@123")}
-              style={{
-                background: "var(--bg-subtle)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "var(--radius-sm)",
-                padding: "0.5rem 0.2rem",
-                color: "var(--text-main)",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.2rem"
-              }}
-            >
-              <Stethoscope size={15} color="#16a34a" />
-              <span>Doctor</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => fillCredentials("patient@smarthospital.local", "Patient@123")}
-              style={{
-                background: "var(--bg-subtle)",
-                border: "1px solid var(--border-color)",
-                borderRadius: "var(--radius-sm)",
-                padding: "0.5rem 0.2rem",
-                color: "var(--text-main)",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.2rem"
-              }}
-            >
-              <User size={15} color="#d97706" />
-              <span>Patient</span>
-            </button>
-          </div>
-        </div>
-
-        <div style={{ marginTop: "1.25rem", textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)" }}>
-          Don't have an account?{" "}
-          <Link to="/register" style={{ color: "var(--primary)", fontWeight: 600, textDecoration: "none" }}>
-            Register
+            Create Profile →
           </Link>
         </div>
-      </div>
+      </header>
+
+      {/* Main Structural Asymmetric Grid */}
+      <main style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+        gap: "4rem",
+        alignItems: "center",
+        padding: "3.5rem 0"
+      }}>
+        {/* Left Column: Bold Editorial Typographic Statement */}
+        <div>
+          <div style={{
+            display: "inline-block",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.75rem",
+            color: "var(--accent-vermilion)",
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            marginBottom: "1rem"
+          }}>
+            [ 01 // AUTONOMOUS TRIAGE DISPATCH ]
+          </div>
+
+          <h1 style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)",
+            fontWeight: 400,
+            lineHeight: 1.05,
+            letterSpacing: "-0.03em",
+            color: "var(--color-ink)",
+            margin: "0 0 1.5rem"
+          }}>
+            Clinical operations, <br />
+            <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "var(--accent-vermilion)" }}>calibrated</em> to zero latency.
+          </h1>
+
+          <p style={{
+            fontSize: "1.05rem",
+            color: "var(--color-ink-subtle)",
+            lineHeight: 1.6,
+            maxWidth: "32rem",
+            margin: "0 0 2rem"
+          }}>
+            Deterministic scheduling locks combined with scikit-learn random forest queues. Designed for physicians, operations leads, and patients requiring instant precision.
+          </p>
+
+          {/* Quick Metrics Bar */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "1.5rem",
+            paddingTop: "2rem",
+            borderTop: "1.5px solid var(--color-ink)"
+          }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.75rem", fontWeight: 800 }}>&lt; 50ms</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>Queue Triage ML</div>
+            </div>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.75rem", fontWeight: 800 }}>100%</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>Slot Lock Safety</div>
+            </div>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.75rem", fontWeight: 800 }}>24/7</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>Facility Sync</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Physical Ticket / Brutalist Access Card */}
+        <div style={{
+          background: "#ffffff",
+          border: "2px solid var(--color-ink)",
+          borderRadius: "8px",
+          padding: "2.5rem",
+          boxShadow: "var(--shadow-hard-md)",
+          position: "relative"
+        }}>
+          {/* Card Eyebrow */}
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingBottom: "1.25rem",
+            marginBottom: "1.5rem",
+            borderBottom: "1.5px dashed var(--color-border)"
+          }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
+              ENTRY TERMINAL // SECURE AUTH
+            </span>
+            <Fingerprint size={18} color="var(--color-ink)" />
+          </div>
+
+          {generalError && (
+            <div role="alert" style={{
+              padding: "0.75rem 1rem",
+              marginBottom: "1.25rem",
+              border: "1.5px solid var(--color-ink)",
+              background: "#fee2e2",
+              color: "#991b1b",
+              fontSize: "0.85rem",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 700,
+              boxShadow: "2px 2px 0px var(--color-ink)"
+            }}>
+              ERR: {generalError}
+            </div>
+          )}
+
+          <form noValidate onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div>
+              <label htmlFor="email" style={{
+                display: "block",
+                fontSize: "0.78rem",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                marginBottom: "0.35rem"
+              }}>
+                [01] Email Credential
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="physician@smarthospital.local"
+                autoComplete="email"
+                required
+                className="field-control"
+              />
+              {fieldErrors.email && (
+                <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)", marginTop: "0.25rem", display: "block" }}>
+                  ! {fieldErrors.email}
+                </span>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="password" style={{
+                display: "block",
+                fontSize: "0.78rem",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                marginBottom: "0.35rem"
+              }}>
+                [02] Secret Passphrase
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                autoComplete="current-password"
+                required
+                className="field-control"
+              />
+              {fieldErrors.password && (
+                <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)", marginTop: "0.25rem", display: "block" }}>
+                  ! {fieldErrors.password}
+                </span>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="button button-primary"
+              style={{
+                width: "100%",
+                minHeight: "3.25rem",
+                fontSize: "0.95rem",
+                marginTop: "0.5rem"
+              }}
+            >
+              {loading ? "INITIALIZING SESSION..." : <>AUTHENTICATE & ENTER →</>}
+            </button>
+          </form>
+
+          {/* Rapid Role Pass Injection */}
+          <div style={{
+            marginTop: "2rem",
+            paddingTop: "1.25rem",
+            borderTop: "1.5px dashed var(--color-border)"
+          }}>
+            <div style={{
+              fontSize: "0.7rem",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 700,
+              color: "var(--color-muted)",
+              textTransform: "uppercase",
+              marginBottom: "0.75rem"
+            }}>
+              QUICK PASS INJECTION:
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem" }}>
+              <button
+                type="button"
+                onClick={() => fillCredentials("admin@smarthospital.local", "Admin@123")}
+                style={{
+                  background: "var(--bg-canvas)",
+                  border: "1.5px solid var(--color-ink)",
+                  borderRadius: "4px",
+                  padding: "0.6rem 0.25rem",
+                  color: "var(--color-ink)",
+                  fontSize: "0.75rem",
+                  fontFamily: "var(--font-mono)",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "2px 2px 0px var(--color-ink)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "0.25rem"
+                }}
+              >
+                <Shield size={14} color="var(--accent-vermilion)" />
+                <span>ADMIN</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fillCredentials("doctor@smarthospital.local", "Doctor@123")}
+                style={{
+                  background: "var(--bg-canvas)",
+                  border: "1.5px solid var(--color-ink)",
+                  borderRadius: "4px",
+                  padding: "0.6rem 0.25rem",
+                  color: "var(--color-ink)",
+                  fontSize: "0.75rem",
+                  fontFamily: "var(--font-mono)",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "2px 2px 0px var(--color-ink)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "0.25rem"
+                }}
+              >
+                <Stethoscope size={14} color="var(--color-ink)" />
+                <span>DOCTOR</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fillCredentials("patient@smarthospital.local", "Patient@123")}
+                style={{
+                  background: "var(--bg-canvas)",
+                  border: "1.5px solid var(--color-ink)",
+                  borderRadius: "4px",
+                  padding: "0.6rem 0.25rem",
+                  color: "var(--color-ink)",
+                  fontSize: "0.75rem",
+                  fontFamily: "var(--font-mono)",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "2px 2px 0px var(--color-ink)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "0.25rem"
+                }}
+              >
+                <User size={14} color="var(--color-ink)" />
+                <span>PATIENT</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Bottom Technical Footer */}
+      <footer style={{
+        paddingTop: "1.5rem",
+        borderTop: "1.5px solid var(--color-ink)",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: "1rem",
+        fontSize: "0.72rem",
+        fontFamily: "var(--font-mono)",
+        color: "var(--color-muted)"
+      }}>
+        <div>SYSTEM STATUS: NORMAL // ENCRYPTED AES-256 // ZERO-KNOWLEDGE ARCHITECTURE</div>
+        <div>AEGLE CLINICAL ENGINE © 2026 • DESIGNED FOR HIGH-PRESSURE BIOMEDICAL WORKFLOWS</div>
+      </footer>
     </div>
   );
 }
