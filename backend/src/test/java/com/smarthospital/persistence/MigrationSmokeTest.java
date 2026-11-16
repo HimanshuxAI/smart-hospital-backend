@@ -45,6 +45,11 @@ class MigrationSmokeTest extends MySqlIntegrationTest {
                 Integer.class);
         assertThat(successfulVersionTwoMigrations).isEqualTo(1);
 
+        Integer successfulVersionThreeMigrations = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '3' AND success = 1",
+                Integer.class);
+        assertThat(successfulVersionThreeMigrations).isEqualTo(1);
+
         for (String table : REQUIRED_TABLES) {
             assertThat(tableExists(table)).as("required table %s", table).isTrue();
         }
@@ -68,6 +73,30 @@ class MigrationSmokeTest extends MySqlIntegrationTest {
                 "SELECT COUNT(*) FROM seed_locks WHERE id = 1",
                 Integer.class);
         assertThat(seedLockRows).isEqualTo(1);
+    }
+
+    @Test
+    void authenticationLifecycleMigrationAddsVersionDeadlineAndLookupColumns() {
+        assertThat(columnExists("users", "auth_version")).isTrue();
+        assertThat(columnExists("refresh_tokens", "auth_version")).isTrue();
+        assertThat(columnExists("refresh_tokens", "family_deadline")).isTrue();
+
+        String usersDefault = jdbcTemplate.queryForObject(
+                "SELECT column_default FROM information_schema.columns "
+                        + "WHERE table_schema = DATABASE() "
+                        + "AND table_name = 'users' AND column_name = 'auth_version'",
+                String.class);
+        assertThat(usersDefault).isEqualTo("0");
+
+        Set<String> indexes = Set.copyOf(jdbcTemplate.queryForList(
+                "SELECT DISTINCT index_name FROM information_schema.statistics "
+                        + "WHERE table_schema = DATABASE()",
+                String.class));
+        assertThat(indexes).contains(
+                "idx_users_role_id",
+                "idx_refresh_tokens_expires_at",
+                "idx_refresh_tokens_family_deadline",
+                "idx_refresh_tokens_user_revoked");
     }
 
     @Test

@@ -19,3 +19,7 @@ smart-hospital:
     jwt:
       secret: local-development-jwt-secret-change-before-production
       issuer: smart-hospital-backend-local
+    cors:
+      allowed-origins:
+        - "http://localhost:3000"
+        - "http://localhost:5173"

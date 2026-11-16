@@ -37,6 +37,12 @@ public class RefreshToken {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "family_deadline", nullable = false, updatable = false)
+    private Instant familyDeadline;
+
+    @Column(name = "auth_version", nullable = false)
+    private long authVersion;
+
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
@@ -50,10 +56,28 @@ public class RefreshToken {
     }
 
     public RefreshToken(User user, String tokenHash, String familyId, Instant expiresAt) {
+        this(
+                user,
+                tokenHash,
+                familyId,
+                expiresAt,
+                expiresAt,
+                user.getAuthVersion());
+    }
+
+    public RefreshToken(
+            User user,
+            String tokenHash,
+            String familyId,
+            Instant expiresAt,
+            Instant familyDeadline,
+            long authVersion) {
         this.user = Objects.requireNonNull(user, "user must not be null");
         this.tokenHash = Objects.requireNonNull(tokenHash, "tokenHash must not be null");
         this.familyId = Objects.requireNonNull(familyId, "familyId must not be null");
         this.expiresAt = Objects.requireNonNull(expiresAt, "expiresAt must not be null");
+        this.familyDeadline = Objects.requireNonNull(familyDeadline, "familyDeadline must not be null");
+        this.authVersion = authVersion;
     }
 
     @PrePersist
@@ -90,6 +114,14 @@ public class RefreshToken {
 
     public Instant getExpiresAt() {
         return expiresAt;
+    }
+
+    public Instant getFamilyDeadline() {
+        return familyDeadline;
+    }
+
+    public long getAuthVersion() {
+        return authVersion;
     }
 
     public Instant getRevokedAt() {

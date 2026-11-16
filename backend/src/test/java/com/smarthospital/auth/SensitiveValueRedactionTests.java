@@ -2,7 +2,9 @@ package com.smarthospital.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.smarthospital.user.AdminUserResponse;
 import com.smarthospital.user.CreateDoctorRequest;
+import com.smarthospital.user.DoctorProfileResponse;
 import com.smarthospital.user.UserRole;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -37,6 +39,77 @@ class SensitiveValueRedactionTests {
         assertThat(registerRequest.toString()).doesNotContain(password).contains("REDACTED");
         assertThat(loginRequest.toString()).doesNotContain(password).contains("REDACTED");
         assertThat(createDoctorRequest.toString()).doesNotContain(password).contains("REDACTED");
+    }
+
+    @Test
+    void piiBearingRecordsOmitPersonalAndLicensingDetails() {
+        String email = "private.person@example.test";
+        String fullName = "Private Person";
+        String phone = "+1-555-0198";
+        String address = "999 Private Street";
+        String emergencyContact = "Private Emergency Contact";
+        String licenseNumber = "PRIVATE-LICENSE-001";
+
+        RegisterRequest registerRequest = new RegisterRequest(
+                fullName,
+                email,
+                "StrongPassword@123",
+                phone,
+                LocalDate.of(1990, 1, 15),
+                "Unspecified",
+                address,
+                emergencyContact);
+        CreateDoctorRequest createDoctorRequest = new CreateDoctorRequest(
+                email,
+                "StrongPassword@123",
+                fullName,
+                phone,
+                1L,
+                "Cardiology",
+                licenseNumber,
+                30);
+        UserSummaryResponse userSummary = new UserSummaryResponse(1L, email, UserRole.PATIENT);
+        AdminUserResponse adminUser = new AdminUserResponse(
+                2L,
+                email,
+                fullName,
+                UserRole.ADMIN,
+                true,
+                phone);
+        DoctorProfileResponse doctorProfile = new DoctorProfileResponse(
+                3L,
+                2L,
+                email,
+                fullName,
+                phone,
+                UserRole.DOCTOR,
+                true,
+                1L,
+                "Cardiology",
+                "Cardiology",
+                licenseNumber,
+                30,
+                true);
+
+        assertThat(registerRequest.toString())
+                .doesNotContain(
+                        fullName,
+                        email,
+                        phone,
+                        "1990-01-15",
+                        address,
+                        emergencyContact)
+                .contains("REDACTED");
+        assertThat(createDoctorRequest.toString())
+                .doesNotContain(fullName, email, phone, licenseNumber)
+                .contains("REDACTED");
+        assertThat(userSummary.toString()).doesNotContain(email).contains("REDACTED");
+        assertThat(adminUser.toString())
+                .doesNotContain(fullName, email, phone)
+                .contains("REDACTED");
+        assertThat(doctorProfile.toString())
+                .doesNotContain(fullName, email, phone, licenseNumber)
+                .contains("REDACTED");
     }
 
     @Test

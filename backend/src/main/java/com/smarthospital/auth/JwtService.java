@@ -17,6 +17,7 @@ public class JwtService {
     public static final String ACCESS_TOKEN_TYPE = "access";
     public static final String ROLE_CLAIM = "role";
     public static final String TYPE_CLAIM = "type";
+    public static final String AUTH_VERSION_CLAIM = "auth_version";
 
     private final JwtEncoder jwtEncoder;
     private final TokenProperties properties;
@@ -39,6 +40,7 @@ public class JwtService {
                 .id(UUID.randomUUID().toString())
                 .claim(ROLE_CLAIM, user.getRole().name())
                 .claim(TYPE_CLAIM, ACCESS_TOKEN_TYPE)
+                .claim(AUTH_VERSION_CLAIM, user.getAuthVersion())
                 .build();
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
