@@ -1,5 +1,6 @@
 # Render Blueprint Specification
-# Deploys: MySQL Database, Python ML Service, Spring Boot Backend, and React Frontend
+# Note: Render provides managed PostgreSQL natively. Spring Boot is configured with multi-engine Flyway/Hibernate,
+# or you can connect an external MySQL database URL (like PlanetScale, Aiven, or Railway MySQL).
 services:
   # 1. Python ML FastAPI Service
   - type: web
@@ -22,25 +23,13 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: DB_USERNAME
-        fromDatabase:
-          name: smart-hospital-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: smart-hospital-db
-          property: password
-      - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: smart-hospital-db
-          property: connectionString
       - key: ML_SERVICE_URL
         fromService:
           type: web
           name: smart-hospital-ml
           property: host
 
-  # 3. React Vite Static Site
+  # 3. React Frontend (Static Site)
   - type: web
     name: smart-hospital-frontend
     env: static
@@ -53,10 +42,3 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-
-databases:
-  # Managed MySQL Database
-  - name: smart-hospital-db
-    databaseName: smart_hospital
-    user: hospital_user
-    plan: free
