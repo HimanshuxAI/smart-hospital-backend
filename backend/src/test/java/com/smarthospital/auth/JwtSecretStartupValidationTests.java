@@ -27,6 +27,11 @@ class JwtSecretStartupValidationTests {
                     "SECURITY_PASSWORD=test-password",
                     "JWT_ISSUER=smart-hospital-backend-test",
                     "JWT_REFRESH_TOKEN_EXPIRATION=P7D",
+                    "JWT_REFRESH_TOKEN_FAMILY_LIFETIME=P30D",
+                    "JWT_REFRESH_TOKEN_CLEANUP_RETENTION=P1D",
+                    "JWT_REFRESH_TOKEN_CLEANUP_CRON=0 0 * * * *",
+                    "JWT_REFRESH_TOKEN_CLEANUP_BATCH_SIZE=100",
+                    "CORS_ALLOWED_ORIGINS=https://allowed.example",
                     "spring.jpa.hibernate.ddl-auto=create-drop",
                     "spring.flyway.enabled=false");
 

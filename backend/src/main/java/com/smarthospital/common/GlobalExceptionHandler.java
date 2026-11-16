@@ -7,6 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -45,6 +46,21 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 request.getRequestURI(),
                 exception.fieldErrors());
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    ResponseEntity<ProblemDetail> handleRateLimitExceeded(
+            RateLimitExceededException exception,
+            HttpServletRequest request) {
+        ProblemDetail problem = problemDetailsFactory.create(
+                exception.status(),
+                exception.code(),
+                exception.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(exception.status())
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.retryAfterSeconds()))
+                .body(problem);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -195,14 +211,28 @@ public class GlobalExceptionHandler {
     ResponseEntity<ProblemDetail> handleUnexpected(
             Exception exception,
             HttpServletRequest request) {
-        LOGGER.error("Unhandled request failure for {} ({})",
+        LOGGER.error(
+                "Unhandled request failure for {} ({})\n{}",
                 request.getRequestURI(),
-                exception.getClass().getName());
+                exception.getClass().getName(),
+                sanitizedStackTrace(exception));
         return response(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "INTERNAL_ERROR",
                 "An unexpected error occurred",
                 request.getRequestURI());
+    }
+
+    private static String sanitizedStackTrace(Exception exception) {
+        StackTraceElement[] stackTrace = exception.getStackTrace();
+        int frameCount = Math.min(stackTrace.length, 64);
+        StringBuilder sanitized = new StringBuilder();
+        for (int index = 0; index < frameCount; index++) {
+            sanitized.append(System.lineSeparator())
+                    .append("at ")
+                    .append(stackTrace[index]);
+        }
+        return sanitized.toString();
     }
 
     private ResponseEntity<ProblemDetail> response(

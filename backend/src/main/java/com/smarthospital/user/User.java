@@ -42,6 +42,9 @@ public class User {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Column(name = "auth_version", nullable = false)
+    private long authVersion;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -126,6 +129,21 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void deactivate() {
+        if (active) {
+            active = false;
+            authVersion++;
+        }
+    }
+
+    public void reactivate() {
+        active = true;
+    }
+
+    public long getAuthVersion() {
+        return authVersion;
     }
 
     public Instant getCreatedAt() {

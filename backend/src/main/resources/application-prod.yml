@@ -22,3 +22,9 @@ smart-hospital:
       issuer: "${JWT_ISSUER}"
     refresh-token:
       expiration: "${JWT_REFRESH_TOKEN_EXPIRATION}"
+      family-lifetime: "${JWT_REFRESH_TOKEN_FAMILY_LIFETIME}"
+      cleanup-retention: "${JWT_REFRESH_TOKEN_CLEANUP_RETENTION}"
+      cleanup-cron: "${JWT_REFRESH_TOKEN_CLEANUP_CRON}"
+      cleanup-batch-size: "${JWT_REFRESH_TOKEN_CLEANUP_BATCH_SIZE}"
+    cors:
+      allowed-origins: "${CORS_ALLOWED_ORIGINS}"
