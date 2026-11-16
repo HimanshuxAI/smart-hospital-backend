@@ -186,8 +186,11 @@ class AuthenticationRateLimitTest extends MySqlIntegrationTest {
         return "rate-limit-" + UUID.randomUUID() + "@example.test";
     }
 
+    private static final java.util.concurrent.atomic.AtomicInteger IP_COUNTER = new java.util.concurrent.atomic.AtomicInteger(1);
+
     private static String uniqueIp() {
-        return "192.0.2." + (UUID.randomUUID().getLeastSignificantBits() & 0x7f) + 1;
+        int val = IP_COUNTER.getAndIncrement();
+        return "10." + ((val >> 16) & 0xff) + "." + ((val >> 8) & 0xff) + "." + (val & 0xff);
     }
 
     static class MutableClockConfiguration {
