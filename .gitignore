@@ -45,3 +45,4 @@ coverage/
 # OS / editors
 Thumbs.db
 *.swp
+docs/
