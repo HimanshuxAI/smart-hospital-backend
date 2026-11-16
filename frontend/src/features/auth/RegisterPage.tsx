@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Activity, ArrowRight, UserPlus, ShieldAlert } from "lucide-react";
+import { ArrowRight, Fingerprint, ShieldAlert, ArrowLeft } from "lucide-react";
 import { useAuth } from "../../auth/auth-context";
 import { validateEmail, validatePassword, validateRequired } from "../../lib/validation";
 
@@ -66,136 +66,93 @@ export function RegisterPage() {
   return (
     <div style={{
       minHeight: "100vh",
+      background: "var(--bg-canvas)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "#090d16",
-      color: "#f8fafc",
-      fontFamily: "var(--font-sans)",
-      padding: "2rem 1rem",
-      position: "relative",
-      overflow: "hidden"
+      padding: "2rem 1.5rem",
+      fontFamily: "var(--font-body)"
     }}>
-      {/* Background ambient lighting */}
-      <div style={{
-        position: "absolute",
-        top: "10%",
-        right: "15%",
-        width: "45vw",
-        height: "45vw",
-        borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(13, 148, 136, 0.15) 0%, transparent 60%)",
-        filter: "blur(60px)",
-        pointerEvents: "none"
-      }} />
-
       <div style={{
         width: "100%",
-        maxWidth: "520px",
-        background: "rgba(15, 23, 42, 0.8)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        borderRadius: "1.75rem",
+        maxWidth: "540px",
+        background: "#ffffff",
+        border: "2px solid var(--color-ink)",
+        borderRadius: "8px",
         padding: "2.75rem",
-        boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.6)",
-        backdropFilter: "blur(24px)",
-        position: "relative",
-        zIndex: 2
+        boxShadow: "var(--shadow-hard-md)",
+        position: "relative"
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
-          <div style={{
-            width: "2.5rem",
-            height: "2.5rem",
-            borderRadius: "0.75rem",
-            background: "linear-gradient(135deg, #0d9488 0%, #0284c7 100%)",
-            display: "grid",
-            placeItems: "center",
-            boxShadow: "0 4px 14px rgba(13, 148, 136, 0.4)"
-          }}>
-            <UserPlus size={20} color="#ffffff" />
-          </div>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingBottom: "1.25rem",
+          marginBottom: "1.75rem",
+          borderBottom: "1.5px dashed var(--color-border)"
+        }}>
           <div>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 800, letterSpacing: "-0.03em", color: "#ffffff", margin: 0 }}>
-              Create Patient Profile
-            </h2>
-            <div style={{ fontSize: "0.75rem", color: "#2dd4bf", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-              Instant Self-Registration
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.72rem", color: "var(--accent-vermilion)", fontWeight: 700, textTransform: "uppercase" }}>
+              [ FORM 104-A // PATIENT INTAKE ]
             </div>
+            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "2rem", margin: "0.25rem 0 0", color: "var(--color-ink)", lineHeight: 1.1 }}>
+              Register Identity
+            </h1>
           </div>
+          <Fingerprint size={28} color="var(--color-ink)" />
         </div>
 
         {generalError && (
           <div role="alert" style={{
-            padding: "0.85rem 1rem",
+            padding: "0.75rem 1rem",
             marginBottom: "1.5rem",
-            borderRadius: "0.75rem",
-            backgroundColor: "rgba(225, 29, 72, 0.12)",
-            border: "1px solid rgba(225, 29, 72, 0.3)",
-            color: "#fda4af",
+            border: "1.5px solid var(--color-ink)",
+            background: "#fee2e2",
+            color: "#991b1b",
             fontSize: "0.85rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem"
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+            boxShadow: "2px 2px 0px var(--color-ink)"
           }}>
-            <ShieldAlert size={18} />
-            <span>{generalError}</span>
+            ERR: {generalError}
           </div>
         )}
 
-        <form noValidate onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+        <form noValidate onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.15rem" }}>
           <div>
-            <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#cbd5e1", marginBottom: "0.35rem" }}>
+            <label style={{ display: "block", fontSize: "0.78rem", fontFamily: "var(--font-mono)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.35rem" }}>
               Full Legal Name
             </label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="e.g. Johnathan Doe"
+              placeholder="e.g. Eleanor Vance"
               required
-              style={{
-                width: "100%",
-                minHeight: "2.75rem",
-                borderRadius: "0.75rem",
-                border: fieldErrors.fullName ? "1.5px solid #e11d48" : "1.5px solid rgba(255, 255, 255, 0.12)",
-                background: "rgba(30, 41, 59, 0.6)",
-                padding: "0.6rem 1rem",
-                color: "#ffffff",
-                fontSize: "0.92rem",
-                outline: "none"
-              }}
+              className="field-control"
             />
-            {fieldErrors.fullName && <span style={{ fontSize: "0.78rem", color: "#fb7185" }}>{fieldErrors.fullName}</span>}
+            {fieldErrors.fullName && <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)" }}>! {fieldErrors.fullName}</span>}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div>
-              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#cbd5e1", marginBottom: "0.35rem" }}>
+              <label style={{ display: "block", fontSize: "0.78rem", fontFamily: "var(--font-mono)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.35rem" }}>
                 Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="patient@domain.com"
+                placeholder="patient@gmail.com"
                 required
-                style={{
-                  width: "100%",
-                  minHeight: "2.75rem",
-                  borderRadius: "0.75rem",
-                  border: fieldErrors.email ? "1.5px solid #e11d48" : "1.5px solid rgba(255, 255, 255, 0.12)",
-                  background: "rgba(30, 41, 59, 0.6)",
-                  padding: "0.6rem 1rem",
-                  color: "#ffffff",
-                  fontSize: "0.92rem",
-                  outline: "none"
-                }}
+                className="field-control"
               />
-              {fieldErrors.email && <span style={{ fontSize: "0.78rem", color: "#fb7185" }}>{fieldErrors.email}</span>}
+              {fieldErrors.email && <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)" }}>! {fieldErrors.email}</span>}
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#cbd5e1", marginBottom: "0.35rem" }}>
-                Contact Phone
+              <label style={{ display: "block", fontSize: "0.78rem", fontFamily: "var(--font-mono)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.35rem" }}>
+                Phone Number
               </label>
               <input
                 type="tel"
@@ -203,103 +160,79 @@ export function RegisterPage() {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555-0199"
                 required
-                style={{
-                  width: "100%",
-                  minHeight: "2.75rem",
-                  borderRadius: "0.75rem",
-                  border: fieldErrors.phone ? "1.5px solid #e11d48" : "1.5px solid rgba(255, 255, 255, 0.12)",
-                  background: "rgba(30, 41, 59, 0.6)",
-                  padding: "0.6rem 1rem",
-                  color: "#ffffff",
-                  fontSize: "0.92rem",
-                  outline: "none"
-                }}
+                className="field-control"
               />
-              {fieldErrors.phone && <span style={{ fontSize: "0.78rem", color: "#fb7185" }}>{fieldErrors.phone}</span>}
+              {fieldErrors.phone && <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)" }}>! {fieldErrors.phone}</span>}
             </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div>
-              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#cbd5e1", marginBottom: "0.35rem" }}>
-                Date of Birth
+              <label style={{ display: "block", fontSize: "0.78rem", fontFamily: "var(--font-mono)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.35rem" }}>
+                Birth Date
               </label>
               <input
                 type="date"
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
                 required
-                style={{
-                  width: "100%",
-                  minHeight: "2.75rem",
-                  borderRadius: "0.75rem",
-                  border: fieldErrors.dateOfBirth ? "1.5px solid #e11d48" : "1.5px solid rgba(255, 255, 255, 0.12)",
-                  background: "rgba(30, 41, 59, 0.6)",
-                  padding: "0.6rem 1rem",
-                  color: "#ffffff",
-                  fontSize: "0.92rem",
-                  outline: "none"
-                }}
+                className="field-control"
               />
-              {fieldErrors.dateOfBirth && <span style={{ fontSize: "0.78rem", color: "#fb7185" }}>{fieldErrors.dateOfBirth}</span>}
+              {fieldErrors.dateOfBirth && <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)" }}>! {fieldErrors.dateOfBirth}</span>}
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#cbd5e1", marginBottom: "0.35rem" }}>
-                Password (min 8 chars)
+              <label style={{ display: "block", fontSize: "0.78rem", fontFamily: "var(--font-mono)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.35rem" }}>
+                Passphrase (8+ chars)
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="StrongPassword@123"
+                placeholder="••••••••••••"
                 required
-                style={{
-                  width: "100%",
-                  minHeight: "2.75rem",
-                  borderRadius: "0.75rem",
-                  border: fieldErrors.password ? "1.5px solid #e11d48" : "1.5px solid rgba(255, 255, 255, 0.12)",
-                  background: "rgba(30, 41, 59, 0.6)",
-                  padding: "0.6rem 1rem",
-                  color: "#ffffff",
-                  fontSize: "0.92rem",
-                  outline: "none"
-                }}
+                className="field-control"
               />
-              {fieldErrors.password && <span style={{ fontSize: "0.78rem", color: "#fb7185" }}>{fieldErrors.password}</span>}
+              {fieldErrors.password && <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)" }}>! {fieldErrors.password}</span>}
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: "100%",
-              minHeight: "3rem",
-              marginTop: "1rem",
-              border: "none",
-              borderRadius: "0.75rem",
-              background: "linear-gradient(135deg, #0d9488 0%, #0284c7 100%)",
-              color: "#ffffff",
-              fontSize: "0.95rem",
-              fontWeight: 700,
-              cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: "0 6px 20px rgba(13, 148, 136, 0.35)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem"
-            }}
+            className="button button-primary"
+            style={{ width: "100%", minHeight: "3.25rem", fontSize: "0.95rem", marginTop: "0.75rem" }}
           >
-            {loading ? "Registering..." : <>Complete Registration <ArrowRight size={18} /></>}
+            {loading ? "ENROLLING PROFILE..." : <>CREATE PROFILE & ENTER →</>}
           </button>
         </form>
 
-        <div style={{ marginTop: "1.75rem", textAlign: "center", fontSize: "0.85rem", color: "#94a3b8" }}>
-          Already have an account?{" "}
-          <Link to="/login" style={{ color: "#38bdf8", fontWeight: 700, textDecoration: "none" }}>
-            Return to Sign In
+        <div style={{
+          marginTop: "2rem",
+          paddingTop: "1.25rem",
+          borderTop: "1.5px dashed var(--color-border)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <Link
+            to="/login"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              fontSize: "0.8rem",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 700,
+              color: "var(--color-ink)",
+              textDecoration: "none"
+            }}
+          >
+            <ArrowLeft size={15} /> Return to Terminal
           </Link>
+          <span style={{ fontSize: "0.72rem", fontFamily: "var(--font-mono)", color: "var(--color-muted)" }}>
+            IDENTITY VERIFIED VIA SHA-256
+          </span>
         </div>
       </div>
     </div>
