@@ -177,4 +177,51 @@ class ScheduleControllerTest extends ClinicalTestSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
     }
+
+    @Test
+    void adminListsEverySlotStatusForADoctorOnOneDate() throws Exception {
+        TestAdmin admin = createAdmin();
+        TestPatient patient = createPatient();
+        TestDoctor doctor = createDoctor();
+        var doctorProfile = doctorProfileRepository.findById(doctor.doctorId()).orElseThrow();
+
+        ScheduleSlot open = scheduleSlotRepository.saveAndFlush(new ScheduleSlot(
+                doctorProfile,
+                Instant.parse("2030-01-15T10:00:00Z"),
+                Instant.parse("2030-01-15T10:30:00Z")));
+        ScheduleSlot booked = scheduleSlotRepository.saveAndFlush(new ScheduleSlot(
+                doctorProfile,
+                Instant.parse("2030-01-15T11:00:00Z"),
+                Instant.parse("2030-01-15T11:30:00Z")));
+        booked.markBooked();
+        scheduleSlotRepository.saveAndFlush(booked);
+        scheduleSlotRepository.saveAndFlush(new ScheduleSlot(
+                doctorProfile,
+                Instant.parse("2030-01-16T10:00:00Z"),
+                Instant.parse("2030-01-16T10:30:00Z")));
+
+        mockMvc.perform(get("/api/v1/admin/slots")
+                        .param("doctorId", String.valueOf(doctor.doctorId()))
+                        .param("date", "2030-01-15")
+                        .header("Authorization", "Bearer " + admin.accessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(open.getId()))
+                .andExpect(jsonPath("$[0].status").value("OPEN"))
+                .andExpect(jsonPath("$[1].id").value(booked.getId()))
+                .andExpect(jsonPath("$[1].status").value("BOOKED"));
+    }
+
+    @Test
+    void nonAdminCannotListScheduleSlots() throws Exception {
+        TestPatient patient = createPatient();
+        TestDoctor doctor = createDoctor();
+
+        mockMvc.perform(get("/api/v1/admin/slots")
+                        .param("doctorId", String.valueOf(doctor.doctorId()))
+                        .param("date", "2030-01-15")
+                        .header("Authorization", "Bearer " + patient.accessToken()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
 }

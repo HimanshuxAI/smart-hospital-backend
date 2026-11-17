@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -297,6 +298,44 @@ public class AppointmentService {
         Appointment appointment = findAppointment(appointmentId);
         verifyReadAccess(actor, appointment);
         return toResponse(appointment);
+    }
+
+    /**
+     * Lists appointments visible to the caller. Patients see their own visits,
+     * doctors see visits assigned to them, and administrators see every visit.
+     * The optional doctor and date filters narrow the result set further.
+     */
+    @Transactional(readOnly = true)
+    public List<AppointmentResponse> list(Long actorUserId, Long doctorId, LocalDate date) {
+        User actor = findUser(actorUserId);
+        List<Appointment> scoped = switch (actor.getRole()) {
+            case PATIENT -> {
+                PatientProfile patient = patientProfileRepository.findByUserId(actorUserId)
+                        .orElseThrow(() -> new ApiException(
+                                HttpStatus.NOT_FOUND,
+                                "PATIENT_PROFILE_NOT_FOUND",
+                                "Patient profile was not found"));
+                yield appointmentRepository.findByPatient_IdOrderByAppointmentDateAscIdAsc(
+                        patient.getId());
+            }
+            case DOCTOR -> {
+                DoctorProfile doctor = doctorProfileRepository.findByUserId(actorUserId)
+                        .orElseThrow(() -> new ApiException(
+                                HttpStatus.NOT_FOUND,
+                                "DOCTOR_PROFILE_NOT_FOUND",
+                                "Doctor profile was not found"));
+                yield appointmentRepository.findByDoctor_IdOrderByAppointmentDateAscIdAsc(
+                        doctor.getId());
+            }
+            case ADMIN -> appointmentRepository.findAllByOrderByAppointmentDateAscIdAsc();
+        };
+
+        return scoped.stream()
+                .filter(appointment -> doctorId == null
+                        || appointment.getDoctor().getId().equals(doctorId))
+                .filter(appointment -> date == null || date.equals(appointment.getAppointmentDate()))
+                .map(this::toResponse)
+                .toList();
     }
 
     private Appointment findAppointment(Long appointmentId) {
