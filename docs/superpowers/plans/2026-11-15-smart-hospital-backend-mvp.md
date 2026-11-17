@@ -6,7 +6,7 @@
 
 **Architecture:** A Java 21 Spring Boot modular monolith owns identity, scheduling, appointment, and queue state in MySQL. A stateless Python FastAPI sidecar owns waiting-time inference; the Java API calls it through a typed HTTP client and returns a deterministic fallback when the sidecar is unavailable.
 
-**Tech Stack:** Java 21, Spring Boot 3.5, Spring Security, Spring Data JPA, Flyway, MySQL 8, Maven Wrapper, JWT, Python 3.12, FastAPI, scikit-learn, pytest, Docker Compose, GitHub Actions.
+**Tech Stack:** Java 21, Spring Boot 3.5, Spring Security, Spring Data JPA, Flyway, MySQL 8, Maven Wrapper, JWT, Python 3.12, FastAPI, scikit-learn, pytest, React 19, TypeScript 7, Vite 8, Tailwind CSS 4, TanStack Query, Vitest.
 
 ---
 
@@ -55,12 +55,12 @@ ml-service/tests/test_model.py
 
 ```text
 .env.example
-docker-compose.yml
-backend/Dockerfile
-ml-service/Dockerfile
-.github/workflows/ci.yml
 docs/api-demo.md
 docs/architecture.md
+frontend/package.json
+frontend/package-lock.json
+frontend/src/...
+frontend/scripts/check-bundle-size.mjs
 ```
 
 ## Task 1: Scaffold both runnable services
@@ -474,40 +474,49 @@ git commit -m "feat: add role dashboards and openapi documentation"
 git push
 ```
 
-## Task 9: Add local operations, containers, and CI
+## Task 9: Build the responsive frontend application
 
 **Files:**
-- Create: `.env.example`
-- Create: `docker-compose.yml`
-- Create: `backend/Dockerfile`
-- Create: `ml-service/Dockerfile`
-- Create: `.github/workflows/ci.yml`
-- Modify: `README.md`
-- Modify: `.gitignore`
+- Create: `frontend/package.json`
+- Create: `frontend/package-lock.json`
+- Create: `frontend/vite.config.ts`
+- Create: `frontend/tsconfig.json`
+- Create: `frontend/src/app/{App.tsx,providers.tsx,router.tsx,error-boundary.tsx}`
+- Create: `frontend/src/api/{client.ts,problem.ts,endpoints.ts,types.ts}`
+- Create: `frontend/src/auth/{AuthProvider.tsx,guards.tsx}`
+- Create: `frontend/src/components/ui/*.tsx`
+- Create: `frontend/src/components/layout/*.tsx`
+- Create: `frontend/src/features/{auth,patient,doctor,admin,appointments,queue,doctors,departments,schedules,dashboards}/*`
+- Create: `frontend/src/mocks/{adapter.ts,data.ts}`
+- Create: `frontend/src/lib/{constants.ts,format.ts,query-keys.ts,validation.ts}`
+- Create: `frontend/src/**/*.test.ts`
+- Create: `frontend/src/**/*.test.tsx`
+- Create: `frontend/scripts/check-bundle-size.mjs`
 
-- [ ] **Step 1: Write and validate Docker Compose configuration**
+- [ ] **Step 1: Implement the frontend test-first foundation**
 
-Compose starts MySQL 8.4 with a health check. Backend and ML services live behind an `full` profile so local-first development remains simple.
+Follow `docs/superpowers/plans/2026-11-15-smart-hospital-frontend.md`. Add failing Vitest coverage for token lifecycle, role guards, RFC 9457 parsing, refresh/retry behavior, route access, queue priority, and accessible interactions before their implementations.
 
-Run `docker compose config`; expected: valid merged configuration with no secret values printed from `.env`.
+Run `cd frontend && npm test -- --run`; expected: all frontend tests pass.
 
-- [ ] **Step 2: Add production-sensible container definitions**
+- [ ] **Step 2: Verify the production frontend build and bundle budget**
 
-Backend Dockerfile uses Maven build stage and Java 21 JRE runtime. ML Dockerfile uses Python 3.12 slim, installs the locked project, and starts Uvicorn. Neither image includes local secrets.
-
-- [ ] **Step 3: Add GitHub Actions**
-
-The workflow uses Java 21 and Python 3.12 caches. It starts a MySQL 8.4 service, runs `./mvnw verify`, and runs `pytest`. It must not require repository secrets.
-
-- [ ] **Step 4: Document local setup**
-
-README includes prerequisites, MySQL setup, migrations, seeded credentials, Maven commands, virtualenv commands, Python training, Swagger URL, environment variables, Docker option, and the complete API demo flow.
-
-- [ ] **Step 5: Commit and push operations**
+Run:
 
 ```bash
-git add .env.example docker-compose.yml backend/Dockerfile ml-service/Dockerfile .github README.md .gitignore
-git commit -m "chore: add local containers and continuous integration"
+cd frontend
+npm run typecheck
+npm run build
+npm run check:bundle-size
+```
+
+Expected: TypeScript exits successfully, Vite creates the production bundle, and initial JavaScript remains below 200 KB gzip.
+
+- [ ] **Step 3: Commit and push the frontend**
+
+```bash
+git add frontend
+git commit -m "feat: add responsive smart hospital frontend"
 git push
 ```
 
@@ -538,10 +547,10 @@ Using MockMvc against a real MySQL Testcontainer, the test performs:
 ```bash
 cd backend && ./mvnw clean verify
 cd ../ml-service && .venv/bin/pytest
-cd .. && docker compose config
+cd ../frontend && npm test -- --run && npm run typecheck && npm run build && npm run check:bundle-size
 ```
 
-Expected: all Java tests, Python tests, and Compose validation pass.
+Expected: all Java tests, Python tests, frontend tests, typechecking, production build, and bundle-budget checks pass.
 
 - [ ] **Step 3: Document architecture and a reproducible API demo**
 
@@ -578,12 +587,13 @@ Review against `docs/superpowers/specs/2026-11-15-smart-hospital-backend-design.
 - [ ] **Step 2: Run final verification from a clean checkout**
 
 ```bash
-git clone --branch feature/backend-mvp https://github.com/HimanshuxAI/smart-hospital-backend.git /tmp/smart-hospital-clean
+git clone --branch feature/frontend-mvp https://github.com/HimanshuxAI/smart-hospital-backend.git /tmp/smart-hospital-clean
 cd /tmp/smart-hospital-clean/backend && ./mvnw clean verify
 cd ../ml-service && python3.12 -m venv .venv && .venv/bin/pip install -e '.[dev]' && .venv/bin/pytest
+cd ../frontend && npm ci && npm test -- --run && npm run typecheck && npm run build && npm run check:bundle-size
 ```
 
-Expected: clean checkout builds and all tests pass.
+Expected: clean checkout builds and all backend, Python, and frontend tests pass.
 
 - [ ] **Step 3: Merge without rewriting history**
 
