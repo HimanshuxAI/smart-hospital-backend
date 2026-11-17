@@ -69,6 +69,16 @@ class ApplicationProfileConfigurationTests {
     }
 
     @Test
+    void commonConfigurationUses750MillisecondMlTimeouts() throws IOException {
+        PropertySource<?> configuration = load("application.yml");
+
+        assertThat(value(configuration, "smart-hospital.ml.connect-timeout"))
+                .isEqualTo("${ML_SERVICE_CONNECT_TIMEOUT:750ms}");
+        assertThat(value(configuration, "smart-hospital.ml.read-timeout"))
+                .isEqualTo("${ML_SERVICE_READ_TIMEOUT:750ms}");
+    }
+
+    @Test
     void localConfigurationDefinesExplicitLocalDatabaseDefaults() throws IOException {
         PropertySource<?> configuration = load("application-local.yml");
 

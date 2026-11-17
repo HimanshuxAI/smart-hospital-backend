@@ -1,5 +1,7 @@
 package com.smarthospital.user;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -26,17 +28,23 @@ public class AdminUserController {
     }
 
     @PostMapping("/doctors")
+    @Operation(tags = "Admin", summary = "Create a doctor profile")
+    @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.CREATED)
     public DoctorProfileResponse createDoctor(@Valid @RequestBody CreateDoctorRequest request) {
         return userService.createDoctor(request);
     }
 
     @GetMapping("/users")
+    @Operation(tags = "Admin", summary = "List users")
+    @SecurityRequirement(name = "bearerAuth")
     public List<AdminUserResponse> listUsers() {
         return userService.listUsers();
     }
 
     @PatchMapping("/users/{id}/activation")
+    @Operation(tags = "Admin", summary = "Activate or deactivate a user")
+    @SecurityRequirement(name = "bearerAuth")
     public AdminUserResponse setActivation(
             @PathVariable Long id,
             @Valid @RequestBody ActivationRequest request) {
@@ -44,11 +52,15 @@ public class AdminUserController {
     }
 
     @GetMapping("/doctors/{doctorId}/profile")
+    @Operation(tags = "Admin", summary = "Get a doctor profile")
+    @SecurityRequirement(name = "bearerAuth")
     public DoctorProfileResponse getDoctorProfile(@PathVariable Long doctorId) {
         return userService.getDoctorProfile(doctorId);
     }
 
     @PutMapping("/doctors/{doctorId}/profile")
+    @Operation(tags = "Admin", summary = "Update a doctor profile")
+    @SecurityRequirement(name = "bearerAuth")
     public DoctorProfileResponse updateDoctorProfile(
             @PathVariable Long doctorId,
             @Valid @RequestBody UpdateDoctorProfileRequest request) {

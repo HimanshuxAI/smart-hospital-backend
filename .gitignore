@@ -30,6 +30,7 @@ dist/
 htmlcov/
 *.joblib
 *.pkl
+ml-service/.artifacts/
 
 # Environment and secrets
 .env

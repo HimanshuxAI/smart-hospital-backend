@@ -65,6 +65,8 @@ smart-hospital:
     check-in:
       early-minutes: "${CHECK_IN_EARLY_MINUTES:30}"
       late-minutes: "${CHECK_IN_LATE_MINUTES:30}"
+  openapi:
+    server-url: "${OPENAPI_SERVER_URL:http://localhost:8080}"
   security:
     jwt:
       secret: "${JWT_SECRET}"
@@ -92,5 +94,5 @@ smart-hospital:
         ip-limit: "${AUTH_REFRESH_IP_RATE_LIMIT:30}"
   ml:
     base-url: "${ML_SERVICE_BASE_URL:http://localhost:8000}"
-    connect-timeout: "${ML_SERVICE_CONNECT_TIMEOUT:2s}"
-    read-timeout: "${ML_SERVICE_READ_TIMEOUT:5s}"
+    connect-timeout: "${ML_SERVICE_CONNECT_TIMEOUT:750ms}"
+    read-timeout: "${ML_SERVICE_READ_TIMEOUT:750ms}"
