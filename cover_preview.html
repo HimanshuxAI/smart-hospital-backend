@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>
+  :root { --paper:#F7F3EA; --ink:#12181F; --teal:#0F5257; --coral:#E4572E; --mute:#555248; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--paper); font-family:Georgia,serif; color:var(--ink); width:13.333in; height:7.5in; position:relative; overflow:hidden; }
+  .logo { position:absolute; left:0.6in; top:0.45in; height:1.15in; }
+  .eyebrow { position:absolute; left:2.0in; top:0.72in; font-family:Calibri,sans-serif; font-size:13pt; color:var(--teal); font-weight:bold; letter-spacing:0.03em; }
+  .cross { position:absolute; width:0.34in; height:0.34in; }
+  .cross .h,.cross .v { position:absolute; background:var(--coral); border-radius:3px; }
+  .cross .h { left:0; top:0.132in; width:0.34in; height:0.076in; }
+  .cross .v { left:0.132in; top:0; width:0.076in; height:0.34in; }
+  .top-cross { left:12.25in; top:0.62in; }
+  .big-cross { left:9.85in; top:2.25in; width:0.55in; height:0.55in; }
+  .big-cross .h { top:0.234in; width:0.55in; height:0.13in; }
+  .big-cross .v { left:0.234in; width:0.13in; height:0.55in; }
+  .toprule { position:absolute; left:0.6in; top:1.75in; width:12.13in; height:0.02in; background:var(--ink); }
+  .title { position:absolute; left:0.6in; top:2.05in; font-size:74pt; font-weight:bold; line-height:0.95; }
+  .subtitle { position:absolute; left:0.62in; top:4.0in; font-size:24pt; color:var(--teal); font-weight:bold; }
+  .rule { position:absolute; left:0.65in; top:5.05in; width:5.8in; height:0.024in; background:var(--ink); }
+  .tagline { position:absolute; left:0.65in; top:5.18in; font-size:16pt; font-weight:bold; }
+  .team { position:absolute; left:0.65in; top:5.85in; font-size:14pt; color:var(--mute); }
+  .quote { position:absolute; left:8.4in; top:3.0in; width:4.2in; height:1in; text-align:center; color:var(--ink); font-size:22pt; font-style:italic; font-weight:bold; line-height:1.15; }
+  .sub { position:absolute; left:8.4in; top:4.05in; width:4.2in; text-align:center; color:var(--teal); font-size:13pt; font-family:Calibri,sans-serif; }
+  .midrule { position:absolute; left:9.2in; top:4.6in; width:2.8in; height:0.014in; background:var(--coral); }
+  .meta { position:absolute; left:8.5in; top:4.75in; width:3.7in; text-align:center; color:var(--mute); font-size:12pt; font-family:Calibri,sans-serif; line-height:1.6; }
+  .bottomrule { position:absolute; left:0.6in; top:6.8in; width:12.13in; height:0.012in; background:var(--ink); }
+  .folio { position:absolute; left:0.6in; top:6.86in; font-family:Calibri,sans-serif; font-size:10pt; color:var(--mute); }
+  .folio-n { position:absolute; left:11.3in; top:6.86in; width:1.43in; text-align:right; font-family:Calibri,sans-serif; font-size:12pt; color:var(--coral); font-weight:bold; }
+</style>
+</head>
+<body>
+  <img class="logo" src="assets/logo.png" alt="MIT-ADT logo"/>
+  <div class="eyebrow">MIT SCHOOL OF COMPUTING · SY2207</div>
+  <div class="cross top-cross"><div class="h"></div><div class="v"></div></div>
+  <div class="toprule"></div>
+  <div class="title">Smart<br/>Hospital</div>
+  <div class="subtitle">Patient Queue &amp;<br/>Appointment Management</div>
+  <div class="rule"></div>
+  <div class="tagline">Book · Token · Track · Triage · Predict</div>
+  <div class="team">Uday Mhaske · Sarthak Kothawale · Aryan Bhorde · Atharv Shewale</div>
+  <div class="cross big-cross"><div class="h"></div><div class="v"></div></div>
+  <div class="quote">A hospital should not be<br/>a waiting room.</div>
+  <div class="sub">A clinic operating system, from booking to consultation.</div>
+  <div class="midrule"></div>
+  <div class="meta">GUIDE · Dr. P. D. Patil<br/>A.Y. 2026–27 · Mini Project / Capstone</div>
+  <div class="bottomrule"></div>
+  <div class="folio">SMART HOSPITAL · PATIENT QUEUE &amp; APPOINTMENT SYSTEM</div>
+  <div class="folio-n">01 / 17</div>
+</body>
+</html>

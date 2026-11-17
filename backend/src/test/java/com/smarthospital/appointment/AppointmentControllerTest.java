@@ -315,6 +315,88 @@ class AppointmentControllerTest extends ClinicalTestSupport {
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
     }
 
+    @Test
+    void patientListsOnlyOwnAppointments() throws Exception {
+        TestPatient owner = createPatient();
+        TestPatient otherPatient = createPatient();
+        TestDoctor doctor = createDoctor();
+        ScheduleSlot ownedSlot = createSlot(doctor, "2030-01-15T10:00:00Z", "2030-01-15T10:30:00Z");
+        ScheduleSlot otherSlot = createSlot(doctor, "2030-01-15T11:00:00Z", "2030-01-15T11:30:00Z");
+        Appointment owned = book(owner, doctor, ownedSlot);
+        book(otherPatient, doctor, otherSlot);
+
+        mockMvc.perform(get("/api/v1/appointments")
+                        .header("Authorization", "Bearer " + owner.accessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(owned.getId()))
+                .andExpect(jsonPath("$[0].patientId").value(owner.patientId()));
+    }
+
+    @Test
+    void doctorListsAssignedAppointmentsAndAdminListsEveryAppointment() throws Exception {
+        TestPatient patient = createPatient();
+        TestDoctor assignedDoctor = createDoctor();
+        TestDoctor otherDoctor = createDoctor();
+        TestAdmin admin = createAdmin();
+        ScheduleSlot assignedSlot = createSlot(
+                assignedDoctor,
+                "2030-01-15T10:00:00Z",
+                "2030-01-15T10:30:00Z");
+        ScheduleSlot otherSlot = createSlot(
+                otherDoctor,
+                "2030-01-15T11:00:00Z",
+                "2030-01-15T11:30:00Z");
+        Appointment assigned = book(patient, assignedDoctor, assignedSlot);
+        Appointment other = book(patient, otherDoctor, otherSlot);
+
+        mockMvc.perform(get("/api/v1/appointments")
+                        .header("Authorization", "Bearer " + assignedDoctor.accessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(assigned.getId()))
+                .andExpect(jsonPath("$[0].doctorId").value(assignedDoctor.doctorId()));
+
+        mockMvc.perform(get("/api/v1/appointments")
+                        .header("Authorization", "Bearer " + admin.accessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == " + assigned.getId() + ")]").isNotEmpty())
+                .andExpect(jsonPath("$[?(@.id == " + other.getId() + ")]").isNotEmpty());
+    }
+
+    @Test
+    void appointmentListSupportsDoctorAndDateFilters() throws Exception {
+        TestPatient patient = createPatient();
+        TestDoctor doctor = createDoctor();
+        TestDoctor otherDoctor = createDoctor();
+        TestAdmin admin = createAdmin();
+        ScheduleSlot todaySlot = createSlot(doctor, "2030-01-15T10:00:00Z", "2030-01-15T10:30:00Z");
+        ScheduleSlot tomorrowSlot = createSlot(doctor, "2030-01-16T10:00:00Z", "2030-01-16T10:30:00Z");
+        ScheduleSlot otherDoctorSlot =
+                createSlot(otherDoctor, "2030-01-15T12:00:00Z", "2030-01-15T12:30:00Z");
+        book(patient, doctor, todaySlot);
+        book(patient, doctor, tomorrowSlot);
+        book(patient, otherDoctor, otherDoctorSlot);
+
+        mockMvc.perform(get("/api/v1/appointments")
+                        .param("date", "2030-01-15")
+                        .header("Authorization", "Bearer " + admin.accessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.appointmentDate != '2030-01-15')]").isEmpty());
+
+        mockMvc.perform(get("/api/v1/appointments")
+                        .param("doctorId", String.valueOf(doctor.doctorId()))
+                        .header("Authorization", "Bearer " + admin.accessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.doctorId != " + doctor.doctorId() + ")]").isEmpty());
+    }
+
+    @Test
+    void anonymousUserCannotListAppointments() throws Exception {
+        mockMvc.perform(get("/api/v1/appointments"))
+                .andExpect(status().isUnauthorized());
+    }
+
     private Appointment book(TestPatient patient, TestDoctor doctor, ScheduleSlot slot) throws Exception {
         mockMvc.perform(post("/api/v1/appointments")
                         .header("Authorization", "Bearer " + patient.accessToken())

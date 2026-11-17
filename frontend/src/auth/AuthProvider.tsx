@@ -15,16 +15,19 @@ import type {
   TokenBundleResponse,
 } from "../api/types";
 import { AuthContext, type AuthContextValue, type AuthStatus } from "./auth-context";
+import type { SessionEvents } from "./session-events";
 
 type AuthProviderProps = {
   adapter: AuthAdapter;
   tokenStore?: TokenStore;
+  sessionEvents?: SessionEvents;
   children: ReactNode;
 };
 
 export function AuthProvider({
   adapter,
   tokenStore = createTokenStore(),
+  sessionEvents,
   children,
 }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -94,6 +97,18 @@ export function AuthProvider({
       setStatus("anonymous");
     }
   }, [adapter, tokenStore]);
+
+  useEffect(() => {
+    if (!sessionEvents) {
+      return;
+    }
+
+    return sessionEvents.subscribe(() => {
+      tokenStore.clear();
+      setUser(null);
+      setStatus("anonymous");
+    });
+  }, [sessionEvents, tokenStore]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, status, signIn, register, signOut }),

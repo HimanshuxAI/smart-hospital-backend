@@ -123,6 +123,29 @@ public class ScheduleService {
                 .toList();
     }
 
+    /**
+     * Lists every active slot for one doctor on one date. Administrators use
+     * this to review published, booked, and cancelled slots together.
+     */
+    @Transactional(readOnly = true)
+    public List<ScheduleSlotResponse> listAdminSlots(Long doctorId, LocalDate date) {
+        DoctorProfile doctor = doctorProfileRepository.findById(doctorId)
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        "DOCTOR_NOT_FOUND",
+                        "Doctor was not found"));
+        Instant rangeStart = date.atStartOfDay(hospitalZoneId).toInstant();
+        Instant rangeEnd = date.plusDays(1).atStartOfDay(hospitalZoneId).toInstant();
+
+        return scheduleSlotRepository.findActiveByDoctorAndStartsAtRange(
+                        doctor.getId(),
+                        rangeStart,
+                        rangeEnd)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private ScheduleSlotResponse toResponse(ScheduleSlot slot) {
         return new ScheduleSlotResponse(
                 slot.getId(),

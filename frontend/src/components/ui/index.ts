@@ -8,5 +8,7 @@ export { EmptyState, ErrorState, LoadingState, Skeleton } from "./feedback";
 export { TextField } from "./field";
 export { Menu } from "./menu";
 export { Pagination } from "./pagination";
+export { SelectField } from "./select";
+export { DataTable } from "./table";
 export { Tabs } from "./tabs";
 export { ToastProvider, ToastViewport, useToast } from "./toast";

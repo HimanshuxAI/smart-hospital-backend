@@ -16,8 +16,6 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
 
     Optional<QueueEntry> findByAppointment_Id(Long appointmentId);
 
-
-
     Optional<QueueEntry> findByDoctor_IdAndQueueDateAndTokenNumber(
             Long doctorId,
             LocalDate queueDate,

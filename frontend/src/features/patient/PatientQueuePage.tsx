@@ -1,62 +1,102 @@
-import { useAuth } from "../../auth/auth-context";
-import { AppShell } from "../../components/layout/AppShell";
-import { Ticket, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+import { useApi } from "../../api/api-context";
+import { WorkspacePage } from "../../components/layout/WorkspacePage";
+import { Badge } from "../../components/ui/badge";
+import { EmptyState, ErrorState, LoadingState } from "../../components/ui/feedback";
+import { formatDateTime, formatWait } from "../../lib/format";
+import { queryKeys } from "../../lib/query-keys";
+import { PriorityBadge } from "../queue/PriorityBadge";
+
+const activeStatuses = new Set(["WAITING", "CALLED", "IN_CONSULTATION"]);
 
 export function PatientQueuePage() {
-  const { user } = useAuth();
+  const api = useApi();
 
-  if (!user) return null;
+  const queueQuery = useQuery({
+    queryKey: queryKeys.queue("patient"),
+    queryFn: () => api.getQueue(),
+  });
+
+  const dashboardQuery = useQuery({
+    queryKey: queryKeys.patientDashboard,
+    queryFn: () => api.getPatientDashboard(),
+  });
+
+  const entries = queueQuery.data ?? [];
+  const activeEntry = entries.find((entry) => activeStatuses.has(entry.queueStatus));
+  const dashboardEntry = dashboardQuery.data?.activeQueueEntry ?? null;
+  const waitMinutes = dashboardEntry?.estimatedWaitMinutes ?? null;
 
   return (
-    <AppShell role="PATIENT" user={user}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
-        
-        <div>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
-            Live Queue Token
-          </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", marginTop: "0.2rem" }}>
-            Your real-time ticket for today's walk-in and consultation triage.
-          </p>
-        </div>
+    <WorkspacePage
+      role="PATIENT"
+      eyebrow="Patient portal"
+      title="Queue token"
+      description="Your live position, triage level, and estimated waiting time."
+    >
+      {queueQuery.isLoading ? <LoadingState label="Loading your token..." /> : null}
 
-        {/* Big Ticket Banner */}
-        <div className="card-saas" style={{ maxWidth: "560px", margin: "0 auto", width: "100%", textAlign: "center", padding: "2.5rem 2rem" }}>
-          <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Admission Token
-          </span>
+      {queueQuery.isError ? (
+        <ErrorState
+          title="Could not load your token"
+          message="Your queue status could not be reached. Try again in a moment."
+          onRetry={() => void queueQuery.refetch()}
+        />
+      ) : null}
 
-          <div style={{ fontSize: "4.5rem", fontWeight: 800, color: "var(--text-main)", lineHeight: 1.1, margin: "0.75rem 0" }}>
-            #T-104
+      {!queueQuery.isLoading && !queueQuery.isError && !activeEntry ? (
+        <EmptyState
+          title="You are not in the queue"
+          description="Check in at the hospital reception and your token will appear here."
+        />
+      ) : null}
+
+      {activeEntry ? (
+        <article className="card token-card">
+          <div className="card-content token-card-content">
+            <span className="token-label">Your queue token</span>
+            <strong className="token-number">#{activeEntry.tokenNumber}</strong>
+
+            <dl className="detail-list">
+              <div>
+                <dt>Status</dt>
+                <dd>
+                  <Badge tone={activeEntry.queueStatus === "WAITING" ? "warning" : "info"}>
+                    {activeEntry.queueStatus.replace("_", " ")}
+                  </Badge>
+                </dd>
+              </div>
+              <div>
+                <dt>Triage</dt>
+                <dd>
+                  <PriorityBadge tier={activeEntry.triageLevel} />
+                </dd>
+              </div>
+              <div>
+                <dt>Position</dt>
+                <dd>
+                  {activeEntry.position > 0
+                    ? `${activeEntry.position} ${activeEntry.position === 1 ? "person" : "people"} ahead of you`
+                    : "You are with the doctor"}
+                </dd>
+              </div>
+              <div>
+                <dt>Estimated wait</dt>
+                <dd>{formatWait(waitMinutes)}</dd>
+              </div>
+              <div>
+                <dt>Arrived</dt>
+                <dd>{formatDateTime(activeEntry.arrivedAt)}</dd>
+              </div>
+            </dl>
+
+            <p className="muted-text">
+              Keep this page open and the token updates as the queue progresses.
+            </p>
           </div>
-
-          <span style={{
-            display: "inline-block",
-            padding: "0.25rem 0.85rem",
-            borderRadius: "9999px",
-            background: "var(--badge-green-bg)",
-            color: "var(--badge-green-text)",
-            border: "1px solid var(--badge-green-border)",
-            fontSize: "0.8rem",
-            fontWeight: 600,
-            marginBottom: "2rem"
-          }}>
-            Status: Priority 3 (Normal Triage)
-          </span>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", textAlign: "left" }}>
-            <div style={{ padding: "1rem", background: "var(--bg-subtle)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Ahead of you</div>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--text-main)", marginTop: "0.2rem" }}>2 Patients</div>
-            </div>
-
-            <div style={{ padding: "1rem", background: "var(--primary-subtle)", borderRadius: "8px", border: "1px solid #bae6fd" }}>
-              <div style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: 600 }}>Estimated Wait</div>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--primary)", marginTop: "0.2rem" }}>~12 mins</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </AppShell>
+        </article>
+      ) : null}
+    </WorkspacePage>
   );
 }
