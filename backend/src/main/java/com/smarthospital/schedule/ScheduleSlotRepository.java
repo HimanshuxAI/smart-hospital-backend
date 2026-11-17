@@ -18,8 +18,21 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
             where s.doctor.id = :doctorId
               and s.startsAt >= :rangeStart
               and s.startsAt < :rangeEnd
-              and s.status = :status
               and s.active = true
+            order by s.startsAt asc, s.id asc
+            """)
+    List<ScheduleSlot> findActiveByDoctorAndStartsAtRange(
+            @Param("doctorId") Long doctorId,
+            @Param("rangeStart") Instant rangeStart,
+            @Param("rangeEnd") Instant rangeEnd);
+
+    @Query("""
+            select s from ScheduleSlot s
+            where s.doctor.id = :doctorId
+              and s.startsAt >= :rangeStart
+              and s.startsAt < :rangeEnd
+              and s.active = true
+              and s.status = :status
             order by s.startsAt asc
             """)
     List<ScheduleSlot> findActiveByDoctorAndStartsAtRange(
