@@ -1,6 +1,9 @@
-import { Bell, Menu } from "lucide-react";
+import { Bell, LogOut, Menu } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import type { AuthUser } from "../../api/types";
+import { useAuth } from "../../auth/auth-context";
 import { Avatar } from "../ui/avatar";
 
 export function TopBar({
@@ -12,6 +15,20 @@ export function TopBar({
   onOpenNavigation(): void;
   demoMode?: boolean;
 }) {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      setSigningOut(false);
+      navigate("/login", { replace: true });
+    }
+  };
+
   return (
     <header className="topbar">
       <div className="topbar-leading">
@@ -36,6 +53,15 @@ export function TopBar({
             <small>{user.role.toLowerCase()}</small>
           </span>
         </div>
+        <button
+          className="icon-button"
+          type="button"
+          aria-label="Sign out"
+          disabled={signingOut}
+          onClick={() => void handleSignOut()}
+        >
+          <LogOut size={19} aria-hidden="true" />
+        </button>
       </div>
     </header>
   );

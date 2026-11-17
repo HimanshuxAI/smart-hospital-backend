@@ -1,51 +1,91 @@
-import { useAuth } from "../../auth/auth-context";
-import { AppShell } from "../../components/layout/AppShell";
-import { Card } from "../../components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+
+import { useApi } from "../../api/api-context";
+import { WorkspacePage } from "../../components/layout/WorkspacePage";
+import { Card, CardContent } from "../../components/ui/card";
+import { EmptyState, ErrorState, LoadingState } from "../../components/ui/feedback";
+import { formatDateTime } from "../../lib/format";
+import { queryKeys } from "../../lib/query-keys";
 import { PriorityBadge } from "../queue/PriorityBadge";
-import { mockPatientDashboard } from "../../mocks/data";
 
 export function PatientDashboardPage() {
-  const { user } = useAuth();
-  const data = mockPatientDashboard;
-  const isDemo = import.meta.env.VITE_API_MODE === "demo";
+  const api = useApi();
 
-  if (!user) return null;
+  const dashboardQuery = useQuery({
+    queryKey: queryKeys.patientDashboard,
+    queryFn: () => api.getPatientDashboard(),
+  });
+
+  const data = dashboardQuery.data;
 
   return (
-    <AppShell role="PATIENT" user={user} demoMode={isDemo}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Welcome, {data.patientName}</h1>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
-          <Card title="Upcoming Appointment">
-            {data.upcomingAppointment ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <div><strong>Doctor:</strong> {data.upcomingAppointment.doctorName}</div>
-                <div><strong>Department:</strong> {data.upcomingAppointment.departmentName}</div>
-                <div><strong>Time:</strong> {new Date(data.upcomingAppointment.startsAt).toLocaleString()}</div>
-                <div><strong>Status:</strong> <span style={{ color: "#0f766e", fontWeight: 600 }}>{data.upcomingAppointment.status}</span></div>
-              </div>
-            ) : (
-              <p style={{ color: "#64748b" }}>No upcoming appointments scheduled.</p>
-            )}
+    <WorkspacePage
+      role="PATIENT"
+      eyebrow="Patient portal"
+      title={data ? `Welcome, ${data.patientName}` : "Welcome"}
+      description="Your next visit and live queue position at a glance."
+    >
+      {dashboardQuery.isLoading ? <LoadingState label="Loading your dashboard..." /> : null}
+
+      {dashboardQuery.isError ? (
+        <ErrorState
+          title="Could not load your dashboard"
+          message="We could not reach the hospital service. Try again in a moment."
+          onRetry={() => void dashboardQuery.refetch()}
+        />
+      ) : null}
+
+      {data ? (
+        <div className="metric-grid metric-grid-two">
+          <Card>
+            <CardContent>
+              <span className="metric-label">Next appointment</span>
+              {data.upcomingAppointment ? (
+                <>
+                  <strong className="metric-value-text">
+                    {data.upcomingAppointment.doctorName}
+                  </strong>
+                  <p className="metric-hint">{data.upcomingAppointment.departmentName}</p>
+                  <p className="metric-hint">
+                    {formatDateTime(data.upcomingAppointment.startsAt)}
+                  </p>
+                </>
+              ) : (
+                <p className="metric-hint">No upcoming appointments scheduled.</p>
+              )}
+            </CardContent>
           </Card>
 
-          <Card title="Active Queue Status">
-            {data.activeQueueEntry ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span><strong>Token:</strong> #{data.activeQueueEntry.tokenNumber}</span>
-                  <PriorityBadge tier={data.activeQueueEntry.triageLevel} />
-                </div>
-                <div><strong>Queue Status:</strong> {data.activeQueueEntry.queueStatus}</div>
-                <div><strong>Position in Line:</strong> {data.activeQueueEntry.position} ahead</div>
-                <div><strong>Estimated Wait:</strong> ~{data.activeQueueEntry.estimatedWaitMinutes} minutes</div>
-              </div>
-            ) : (
-              <p style={{ color: "#64748b" }}>You are not currently in an active queue.</p>
-            )}
+          <Card>
+            <CardContent>
+              <span className="metric-label">Active queue token</span>
+              {data.activeQueueEntry ? (
+                <>
+                  <strong className="metric-value-text">
+                    #{data.activeQueueEntry.tokenNumber}
+                  </strong>
+                  <p className="metric-hint">
+                    <PriorityBadge tier={data.activeQueueEntry.triageLevel} />
+                  </p>
+                  <p className="metric-hint">
+                    {data.activeQueueEntry.position} ahead · about{" "}
+                    {data.activeQueueEntry.estimatedWaitMinutes} min
+                  </p>
+                </>
+              ) : (
+                <p className="metric-hint">You are not currently in an active queue.</p>
+              )}
+            </CardContent>
           </Card>
         </div>
-      </div>
-    </AppShell>
+      ) : null}
+
+      {!dashboardQuery.isLoading && !dashboardQuery.isError && !data ? (
+        <EmptyState
+          title="No dashboard data"
+          description="Your visits and queue token will appear here once services respond."
+        />
+      ) : null}
+    </WorkspacePage>
   );
 }

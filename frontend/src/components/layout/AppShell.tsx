@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 
 import type { AuthUser, UserRole } from "../../api/types";
 import { Drawer } from "../ui/drawer";
@@ -15,9 +16,14 @@ export function AppShell({
   role: UserRole;
   user: AuthUser;
   demoMode?: boolean;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setNavigationOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="app-shell">

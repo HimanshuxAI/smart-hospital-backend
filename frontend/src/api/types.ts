@@ -72,3 +72,141 @@ export type AdminDashboard = {
   appointmentsToday: number;
   queueEntriesToday: number;
 };
+
+export type Department = {
+  id: number;
+  name: string;
+  description: string | null;
+  active: boolean;
+};
+
+export type DirectoryDoctor = {
+  id: number;
+  userId: number;
+  fullName: string;
+  departmentId: number | null;
+  departmentName: string | null;
+  specialty: string | null;
+  averageConsultationMinutes: number;
+};
+
+export type ScheduleSlotStatus = "AVAILABLE" | "BOOKED" | "CANCELLED";
+
+export type ScheduleSlot = {
+  id: number;
+  doctorId: number;
+  startsAt: string;
+  endsAt: string;
+  reasonLabel: string | null;
+  status: ScheduleSlotStatus | string;
+};
+
+export type QueueEntry = {
+  queueEntryId: number;
+  appointmentId: number | null;
+  patientId: number;
+  doctorId: number | null;
+  queueDate: string;
+  token: number;
+  tokenNumber: number;
+  queueStatus: QueueStatus;
+  triageLevel: EmergencyTier;
+  position: number;
+  arrivedAt: string;
+  calledAt: string | null;
+  servedAt: string | null;
+  completedAt: string | null;
+};
+
+export type AppointmentStatus =
+  | "BOOKED"
+  | "CONFIRMED"
+  | "CHECKED_IN"
+  | "COMPLETED"
+  | "CANCELLED"
+  | string;
+
+export type Appointment = {
+  id: number;
+  patientId: number;
+  doctorId: number;
+  slotId: number | null;
+  appointmentDate: string;
+  startsAt: string;
+  endsAt: string;
+  visitReason: string | null;
+  status: AppointmentStatus;
+  checkedInAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+};
+
+export type AdminUser = {
+  id: number;
+  email: string;
+  fullName: string;
+  role: UserRole;
+  active: boolean;
+  phone: string | null;
+};
+
+export type DoctorProfile = {
+  id: number;
+  userId: number;
+  email: string;
+  fullName: string;
+  phone: string | null;
+  role: UserRole;
+  active: boolean;
+  departmentId: number | null;
+  departmentName: string | null;
+  specialty: string | null;
+  licenseNumber: string | null;
+  averageConsultationMinutes: number;
+  profileActive: boolean;
+};
+
+export type CreateDoctorInput = {
+  email: string;
+  password: string;
+  fullName: string;
+  phone?: string;
+  departmentId: number;
+  specialty?: string;
+  licenseNumber?: string;
+  averageConsultationMinutes?: number;
+};
+
+export type UpdateDoctorProfileInput = {
+  fullName?: string;
+  phone?: string;
+  departmentId?: number;
+  specialty?: string;
+  licenseNumber?: string;
+  averageConsultationMinutes?: number;
+  active?: boolean;
+};
+
+export type CreateSlotInput = {
+  doctorId: number;
+  startsAt: string;
+  endsAt: string;
+  reasonLabel?: string;
+};
+
+export type BookAppointmentInput = {
+  slotId: number;
+  doctorId?: number | undefined;
+  visitReason: string;
+};
+
+export type QueueQuery = {
+  doctorId?: number | undefined;
+  date?: string | undefined;
+};
+
+export type AppointmentQuery = {
+  doctorId?: number | undefined;
+  date?: string | undefined;
+};

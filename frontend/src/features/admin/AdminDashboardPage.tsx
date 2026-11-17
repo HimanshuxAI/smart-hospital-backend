@@ -1,37 +1,79 @@
-import { useAuth } from "../../auth/auth-context";
-import { AppShell } from "../../components/layout/AppShell";
-import { Card } from "../../components/ui/card";
-import { mockAdminDashboard } from "../../mocks/data";
+import { useQuery } from "@tanstack/react-query";
+
+import { useApi } from "../../api/api-context";
+import { WorkspacePage } from "../../components/layout/WorkspacePage";
+import { Card, CardContent } from "../../components/ui/card";
+import { EmptyState, ErrorState, LoadingState } from "../../components/ui/feedback";
+import { queryKeys } from "../../lib/query-keys";
 
 export function AdminDashboardPage() {
-  const { user } = useAuth();
-  const data = mockAdminDashboard;
-  const isDemo = import.meta.env.VITE_API_MODE === "demo";
+  const api = useApi();
 
-  if (!user) return null;
+  const dashboardQuery = useQuery({
+    queryKey: queryKeys.adminDashboard,
+    queryFn: () => api.getAdminDashboard(),
+  });
+
+  const data = dashboardQuery.data;
 
   return (
-    <AppShell role="ADMIN" user={user} demoMode={isDemo}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>System Administration</h1>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
-          <Card title="Total Users">
-            <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>{data.totalUsers}</p>
+    <WorkspacePage
+      role="ADMIN"
+      eyebrow="Administration"
+      title="Operations"
+      description="A live snapshot of users, clinicians, and today's hospital activity."
+    >
+      {dashboardQuery.isLoading ? <LoadingState label="Loading operations..." /> : null}
+
+      {dashboardQuery.isError ? (
+        <ErrorState
+          title="Could not load operations"
+          message="The operations overview could not be reached. Try again in a moment."
+          onRetry={() => void dashboardQuery.refetch()}
+        />
+      ) : null}
+
+      {data ? (
+        <div className="metric-grid">
+          <Card>
+            <CardContent>
+              <span className="metric-label">Total users</span>
+              <strong className="metric-value">{data.totalUsers}</strong>
+            </CardContent>
           </Card>
-          <Card title="Active Doctors">
-            <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>{data.totalDoctors}</p>
+          <Card>
+            <CardContent>
+              <span className="metric-label">Active doctors</span>
+              <strong className="metric-value">{data.totalDoctors}</strong>
+            </CardContent>
           </Card>
-          <Card title="Departments">
-            <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>{data.totalDepartments}</p>
+          <Card>
+            <CardContent>
+              <span className="metric-label">Departments</span>
+              <strong className="metric-value">{data.totalDepartments}</strong>
+            </CardContent>
           </Card>
-          <Card title="Appointments Today">
-            <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>{data.appointmentsToday}</p>
+          <Card>
+            <CardContent>
+              <span className="metric-label">Appointments today</span>
+              <strong className="metric-value">{data.appointmentsToday}</strong>
+            </CardContent>
           </Card>
-          <Card title="Queued Today">
-            <p style={{ fontSize: "1.75rem", fontWeight: "bold" }}>{data.queueEntriesToday}</p>
+          <Card>
+            <CardContent>
+              <span className="metric-label">Queued today</span>
+              <strong className="metric-value">{data.queueEntriesToday}</strong>
+            </CardContent>
           </Card>
         </div>
-      </div>
-    </AppShell>
+      ) : null}
+
+      {!dashboardQuery.isLoading && !dashboardQuery.isError && !data ? (
+        <EmptyState
+          title="No operational data"
+          description="The operations overview will populate once the hospital services report in."
+        />
+      ) : null}
+    </WorkspacePage>
   );
 }
