@@ -16,16 +16,6 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
 
     Optional<QueueEntry> findByAppointment_Id(Long appointmentId);
 
-    @Query("""
-            select q from QueueEntry q
-            join fetch q.appointment a
-            join fetch a.patient p
-            join fetch a.slot s
-            join fetch q.doctor d
-            where q.id = :entryId
-            """)
-    Optional<QueueEntry> findDetailedById(@Param("entryId") Long entryId);
-
     Optional<QueueEntry> findByDoctor_IdAndQueueDateAndTokenNumber(
             Long doctorId,
             LocalDate queueDate,
