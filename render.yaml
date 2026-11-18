@@ -25,11 +25,8 @@ services:
         value: "true"
       - key: SERVER_PORT
         value: "8080"
-      - key: ML_SERVICE_URL
-        fromService:
-          type: web
-          name: smart-hospital-ml
-          property: host
+      - key: ML_SERVICE_BASE_URL
+        value: https://smart-hospital-ml.onrender.com
 
   # 3. React Frontend (Static Site)
   - type: web

@@ -77,7 +77,7 @@ export function RegisterPage() {
           </span>
           <div>
             <strong>Aegle</strong>
-            <small>Clinical OS</small>
+            <small>Smart Hospital</small>
           </div>
         </div>
 
@@ -216,7 +216,7 @@ export function RegisterPage() {
       </main>
 
       <footer className="auth-footer">
-        <span>Aegle Clinical OS</span>
+        <span>Aegle · Smart Hospital</span>
       </footer>
     </div>
   );

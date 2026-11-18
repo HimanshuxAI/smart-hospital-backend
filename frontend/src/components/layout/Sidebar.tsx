@@ -51,7 +51,7 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
         </span>
         <div>
           <strong>Aegle</strong>
-          <small>{roleLabels[role]} workspace</small>
+          <small>{roleLabels[role]}</small>
         </div>
       </div>
 

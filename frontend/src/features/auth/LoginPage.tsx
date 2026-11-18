@@ -90,7 +90,7 @@ export function LoginPage() {
           </span>
           <div>
             <strong>Aegle</strong>
-            <small>Clinical OS</small>
+            <small>Smart Hospital</small>
           </div>
         </div>
 
@@ -229,7 +229,7 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="auth-divider">or use a demo pass</div>
+          <div className="auth-divider">Or use a demo pass</div>
 
           <div className="auth-roles">
             {demoRoles.map((role) => {
@@ -258,7 +258,7 @@ export function LoginPage() {
       </main>
 
       <footer className="auth-footer">
-        <span>Aegle Clinical OS</span>
+        <span>Aegle · Smart Hospital</span>
       </footer>
     </div>
   );
