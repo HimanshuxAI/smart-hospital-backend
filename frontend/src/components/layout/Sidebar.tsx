@@ -50,8 +50,8 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
           <HeartPulse size={21} />
         </span>
         <div>
-          <strong>Smart Hospital</strong>
-          <small>{roleLabels[role]}</small>
+          <strong style={{ color: "var(--color-ink)" }}>Smart Hospital</strong>
+          <small style={{ color: "var(--color-muted)" }}>{roleLabels[role]}</small>
         </div>
       </div>
 

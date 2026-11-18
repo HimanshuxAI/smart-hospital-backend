@@ -25,8 +25,10 @@ export function AppShell({
     setNavigationOpen(false);
   }, [location.pathname]);
 
+  const isNightOps = role === "DOCTOR" || role === "ADMIN";
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isNightOps ? "theme-night-ops" : ""}`}>
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>

@@ -4,6 +4,14 @@
   color-scheme: light;
   --bg-canvas: var(--color-surface-subtle);
   --color-ink: #10233f;
+  /* Pulse theme (patient portal — light, warm) */
+  --theme-pulse-primary: #4F8A6F;
+  --theme-pulse-dark: #1E3A2F;
+  --theme-pulse-accent: #FF8A65;
+  --theme-pulse-bg: #FBF8F3;
+  --theme-pulse-surface: #FFFFFF;
+  --theme-pulse-text: #25302B;
+  --theme-pulse-emergency: #D64045;
   --color-muted: #52657a;
   --color-primary: #0f766e;
   --color-primary-strong: #115e59;
@@ -41,6 +49,21 @@
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+}
+
+/* Night Ops theme (doctor/admin dashboards — dark control room) */
+.theme-night-ops {
+  --theme-primary: #22D3EE;
+  --theme-dark: #131C2E;
+  --theme-accent: #A3E635;
+  --theme-bg: #0B1220;
+  --theme-surface: #131C2E;
+  --theme-text: #E6EDF7;
+  --theme-emergency: #FF5470;
+  --theme-muted: #8393AD;
+  --theme-border: #222E45;
+  color-scheme: dark;
+  background: var(--theme-bg);
 }
 
 * {
