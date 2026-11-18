@@ -2,6 +2,7 @@
 
 :root {
   color-scheme: light;
+  --bg-canvas: var(--color-surface-subtle);
   --color-ink: #10233f;
   --color-muted: #52657a;
   --color-primary: #0f766e;
