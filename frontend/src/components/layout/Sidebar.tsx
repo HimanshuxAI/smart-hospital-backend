@@ -47,11 +47,11 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
     <aside className="sidebar">
       <div className="brand">
         <span className="brand-mark" aria-hidden="true">
-          <HeartPulse size={21} />
+          <HeartPulse size={20} />
         </span>
         <div>
-          <strong style={{ color: "var(--theme-text)" }}>Smart Hospital</strong>
-          <small style={{ color: "var(--theme-muted)" }}>{roleLabels[role]}</small>
+          <strong>Aegle</strong>
+          <small>{roleLabels[role]} workspace</small>
         </div>
       </div>
 
@@ -75,22 +75,18 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
         })}
       </nav>
 
-      <div style={{ marginTop: "auto", paddingTop: "1rem", borderTop: "1.5px dashed var(--theme-border)" }}>
+      <div className="sidebar-foot">
+        <div className="sidebar-status">
+          <span className="status-dot" aria-hidden="true" />
+          <span>All systems online</span>
+        </div>
         <button
           type="button"
           onClick={handleSignOut}
-          className="button button-secondary"
-          style={{
-            width: "100%",
-            justifyContent: "flex-start",
-            gap: "0.6rem",
-            color: "var(--theme-emergency)",
-            borderColor: "var(--theme-border)",
-            fontSize: "0.82rem"
-          }}
+          className="sidebar-signout"
         >
-          <LogOut size={16} color="var(--theme-emergency)" />
-          <span>Sign Out</span>
+          <LogOut size={16} aria-hidden="true" />
+          <span>Sign out</span>
         </button>
       </div>
     </aside>

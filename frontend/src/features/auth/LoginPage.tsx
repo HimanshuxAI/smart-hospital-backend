@@ -1,8 +1,25 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowUpRight, Zap, Shield, Key, Stethoscope, User, Fingerprint } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarClock,
+  HeartPulse,
+  ShieldCheck,
+  Sparkles,
+  Stethoscope,
+  Timer,
+  UserRound,
+  Shield,
+} from "lucide-react";
+
 import { useAuth } from "../../auth/auth-context";
 import { validateEmail, validatePassword } from "../../lib/validation";
+
+const demoRoles = [
+  { key: "admin", label: "Admin", icon: Shield, email: "admin@smarthospital.local", password: "Admin@123" },
+  { key: "doctor", label: "Doctor", icon: Stethoscope, email: "doctor@smarthospital.local", password: "Doctor@123" },
+  { key: "patient", label: "Patient", icon: UserRound, email: "patient@smarthospital.local", password: "Patient@123" },
+] as const;
 
 export function LoginPage() {
   const { signIn } = useAuth();
@@ -47,7 +64,8 @@ export function LoginPage() {
       if (from) {
         navigate(from, { replace: true });
       } else {
-        const dest = user.role === "PATIENT" ? "/patient" : user.role === "DOCTOR" ? "/doctor" : "/admin";
+        const dest =
+          user.role === "PATIENT" ? "/patient" : user.role === "DOCTOR" ? "/doctor" : "/admin";
         navigate(dest, { replace: true });
       }
     } catch (err: unknown) {
@@ -64,216 +82,125 @@ export function LoginPage() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "var(--bg-canvas)",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      padding: "2rem clamp(1.5rem, 5vw, 4rem)",
-      fontFamily: "var(--font-body)"
-    }}>
-      {/* Top Architectural Header Strip */}
-      <header style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingBottom: "1.5rem",
-        borderBottom: "1.5px solid var(--theme-border)"
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{
-            width: "2.25rem",
-            height: "2.25rem",
-            background: "var(--theme-primary)",
-            color: "var(--theme-surface)",
-            display: "grid",
-            placeItems: "center",
-            fontWeight: 800,
-            fontSize: "1rem",
-            fontFamily: "var(--font-mono)",
-            borderRadius: "12px"
-          }}>
-            Æ
-          </div>
+    <div className="auth-page">
+      <header className="auth-topbar">
+        <div className="auth-brand">
+          <span className="auth-mark" aria-hidden="true">
+            <HeartPulse size={20} />
+          </span>
           <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--theme-text)" }}>
-              AEGLE CLINICAL OS
-            </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", color: "var(--theme-muted)", textTransform: "uppercase" }}>
-              SYS.ID: TOKYO-MED-992 // RUNNING
-            </div>
+            <strong>Aegle</strong>
+            <small>Clinical OS</small>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          <Link
-            to="/register"
-            style={{
-              padding: "0.45rem 1rem",
-              border: "1.5px solid var(--theme-border)",
-              borderRadius: "12px",
-              background: "var(--theme-surface)",
-              fontSize: "0.8rem",
-              fontWeight: 700,
-              fontFamily: "var(--font-display)",
-              color: "var(--theme-text)",
-              boxShadow: "2px 2px 0px var(--theme-text)"
-            }}
-          >
-            Create Profile →
-          </Link>
-        </div>
+        <Link to="/register" className="auth-toplink">
+          <span>New patient?</span>
+          <span style={{ color: "var(--color-primary)", fontWeight: 700 }}>Create account</span>
+          <ArrowRight size={15} aria-hidden="true" />
+        </Link>
       </header>
 
-      {/* Main Structural Asymmetric Grid */}
-      <main style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-        gap: "4rem",
-        alignItems: "center",
-        padding: "3.5rem 0"
-      }}>
-        {/* Left Column: Bold Editorial Typographic Statement */}
-        <div>
-          <div style={{
-            display: "inline-block",
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.75rem",
-            color: "var(--accent-vermilion)",
-            fontWeight: 700,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            marginBottom: "1rem"
-          }}>
-            [ 01 // AUTONOMOUS TRIAGE DISPATCH ]
-          </div>
+      <main className="auth-main">
+        <section className="auth-editorial" aria-hidden="true">
+          <span className="auth-kicker">
+            <span className="auth-kicker-dot" />
+            Live care coordination
+          </span>
 
-          <h1 style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)",
-            fontWeight: 400,
-            lineHeight: 1.05,
-            letterSpacing: "-0.03em",
-            color: "var(--color-ink)",
-            margin: "0 0 1.5rem"
-          }}>
-            Clinical operations, <br />
-            <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "var(--accent-vermilion)" }}>calibrated</em> to zero latency.
+          <h1>
+            Care that moves at the <em>speed</em> of need.
           </h1>
 
-          <p style={{
-            fontSize: "1.05rem",
-            color: "var(--color-ink-subtle)",
-            lineHeight: 1.6,
-            maxWidth: "32rem",
-            margin: "0 0 2rem"
-          }}>
-            Deterministic scheduling locks combined with scikit-learn random forest queues. Designed for physicians, operations leads, and patients requiring instant precision.
+          <p className="auth-lede">
+            One calm workspace for appointments, live queues and triage — built so clinicians can
+            stay with the person in front of them, not the screen.
           </p>
 
-          {/* Quick Metrics Bar */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "1.5rem",
-            paddingTop: "2rem",
-            borderTop: "1.5px solid var(--color-ink)"
-          }}>
-            <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.75rem", fontWeight: 800 }}>&lt; 50ms</div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>Queue Triage ML</div>
+          <div className="auth-features">
+            <div className="auth-feature">
+              <span className="auth-feature-icon">
+                <CalendarClock size={17} />
+              </span>
+              <div>
+                <strong>Book without collisions</strong>
+                <span>Deterministic slot locking keeps every appointment honest.</span>
+              </div>
             </div>
-            <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.75rem", fontWeight: 800 }}>100%</div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>Slot Lock Safety</div>
+
+            <div className="auth-feature">
+              <span className="auth-feature-icon">
+                <Timer size={17} />
+              </span>
+              <div>
+                <strong>Watch the queue breathe</strong>
+                <span>Live positions and wait estimates update as care happens.</span>
+              </div>
             </div>
-            <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.75rem", fontWeight: 800 }}>24/7</div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "var(--color-muted)", textTransform: "uppercase" }}>Facility Sync</div>
+
+            <div className="auth-feature">
+              <span className="auth-feature-icon">
+                <Sparkles size={17} />
+              </span>
+              <div>
+                <strong>Triage that thinks ahead</strong>
+                <span>A trained model ranks urgency so the sickest are seen first.</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Column: Physical Ticket / Brutalist Access Card */}
-        <div style={{
-          background: "var(--theme-surface)",
-          border: "2px solid var(--theme-border)",
-          borderRadius: "20px",
-          padding: "2.5rem",
-          boxShadow: "0 10px 30px rgb(0 0 0 / 0.06)",
-          position: "relative"
-        }}>
-          {/* Card Eyebrow */}
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingBottom: "1.25rem",
-            marginBottom: "1.5rem",
-            borderBottom: "1.5px dashed var(--color-border)"
-          }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
-              ENTRY TERMINAL // SECURE AUTH
-            </span>
-            <Fingerprint size={18} color="var(--theme-text)" />
+          <svg
+            className="auth-pulse"
+            viewBox="0 0 420 56"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M0 30H96l10-18 14 34 12-26 10 10h38l8-14 12 24 10-10h210"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </section>
+
+        <section className="auth-card" aria-labelledby="signin-heading">
+          <div className="auth-card-head">
+            <span className="page-eyebrow">Secure sign-in</span>
+            <h2 id="signin-heading">Welcome back.</h2>
+            <p>Pick up exactly where your day left off.</p>
           </div>
 
           {generalError && (
-            <div role="alert" style={{
-              padding: "0.75rem 1rem",
-              marginBottom: "1.25rem",
-              border: "1.5px solid var(--theme-emergency)",
-              background: "rgba(214, 64, 69, 0.1)",
-              color: "var(--theme-emergency)",
-              fontSize: "0.85rem",
-              fontFamily: "var(--font-mono)",
-              fontWeight: 700,
-              boxShadow: "2px 2px 0px var(--color-ink)"
-            }}>
-              ERR: {generalError}
+            <div role="alert" className="auth-error" style={{ marginTop: "1.25rem" }}>
+              <ShieldCheck size={16} style={{ flex: "0 0 auto", marginTop: "1px" }} />
+              <span>{generalError}</span>
             </div>
           )}
 
-          <form noValidate onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            <div>
-              <label htmlFor="email" style={{
-                display: "block",
-                fontSize: "0.78rem",
-                fontFamily: "var(--font-mono)",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                marginBottom: "0.35rem"
-              }}>
-                [01] Email Credential
+          <form noValidate onSubmit={handleSubmit} className="auth-form">
+            <div className="field">
+              <label htmlFor="email" className="field-label">
+                Email address
               </label>
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="physician@smarthospital.local"
+                placeholder="you@smarthospital.local"
                 autoComplete="email"
                 required
-                className="field-control"
+                className={`field-control${fieldErrors.email ? " field-invalid" : ""}`}
               />
-              {fieldErrors.email && (
-                <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)", marginTop: "0.25rem", display: "block" }}>
-                  ! {fieldErrors.email}
-                </span>
-              )}
+              {fieldErrors.email && <span className="field-error">{fieldErrors.email}</span>}
             </div>
 
-            <div>
-              <label htmlFor="password" style={{
-                display: "block",
-                fontSize: "0.78rem",
-                fontFamily: "var(--font-mono)",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                marginBottom: "0.35rem"
-              }}>
-                [02] Secret Passphrase
+            <div className="field">
+              <label htmlFor="password" className="field-label">
+                Password
               </label>
               <input
                 id="password"
@@ -283,138 +210,63 @@ export function LoginPage() {
                 placeholder="••••••••••••"
                 autoComplete="current-password"
                 required
-                className="field-control"
+                className={`field-control${fieldErrors.password ? " field-invalid" : ""}`}
               />
-              {fieldErrors.password && (
-                <span style={{ fontSize: "0.75rem", color: "#dc2626", fontFamily: "var(--font-mono)", marginTop: "0.25rem", display: "block" }}>
-                  ! {fieldErrors.password}
-                </span>
-              )}
+              {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
             </div>
 
             <button
               type="submit"
               disabled={loading}
               className="button button-primary"
-              style={{
-                width: "100%",
-                minHeight: "3.25rem",
-                fontSize: "0.95rem",
-                marginTop: "0.5rem"
-              }}
+              style={{ width: "100%", minHeight: "3rem", marginTop: "0.35rem" }}
             >
-              {loading ? "INITIALIZING SESSION..." : <>AUTHENTICATE & ENTER →</>}
+              {loading ? (
+                <>
+                  <span className="button-spinner" aria-hidden="true" />
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  Sign in to workspace
+                  <ArrowRight size={17} aria-hidden="true" />
+                </>
+              )}
             </button>
           </form>
 
-          {/* Rapid Role Pass Injection */}
-          <div style={{
-            marginTop: "2rem",
-            paddingTop: "1.25rem",
-            borderTop: "1.5px dashed var(--color-border)"
-          }}>
-            <div style={{
-              fontSize: "0.7rem",
-              fontFamily: "var(--font-mono)",
-              fontWeight: 700,
-              color: "var(--color-muted)",
-              textTransform: "uppercase",
-              marginBottom: "0.75rem"
-            }}>
-              QUICK PASS INJECTION:
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem" }}>
-              <button
-                type="button"
-                onClick={() => fillCredentials("admin@smarthospital.local", "Admin@123")}
-                style={{
-                  background: "var(--theme-surface)",
-                  border: "1.5px solid var(--theme-border)",
-                  borderRadius: "12px",
-                  padding: "0.6rem 0.25rem",
-                  color: "var(--theme-text)",
-                  fontSize: "0.75rem",
-                  fontFamily: "var(--font-mono)",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  boxShadow: "2px 2px 0px var(--theme-text)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "0.25rem"
-                }}
-              >
-                <Shield size={14} color="var(--theme-accent)" />
-                <span>ADMIN</span>
-              </button>
+          <div className="auth-divider">or use a demo pass</div>
 
-              <button
-                type="button"
-                onClick={() => fillCredentials("doctor@smarthospital.local", "Doctor@123")}
-                style={{
-                  background: "var(--theme-surface)",
-                  border: "1.5px solid var(--theme-border)",
-                  borderRadius: "12px",
-                  padding: "0.6rem 0.25rem",
-                  color: "var(--theme-text)",
-                  fontSize: "0.75rem",
-                  fontFamily: "var(--font-mono)",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  boxShadow: "2px 2px 0px var(--theme-text)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "0.25rem"
-                }}
-              >
-                <Stethoscope size={14} color="var(--theme-text)" />
-                <span>DOCTOR</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillCredentials("patient@smarthospital.local", "Patient@123")}
-                style={{
-                  background: "var(--theme-surface)",
-                  border: "1.5px solid var(--theme-border)",
-                  borderRadius: "12px",
-                  padding: "0.6rem 0.25rem",
-                  color: "var(--theme-text)",
-                  fontSize: "0.75rem",
-                  fontFamily: "var(--font-mono)",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  boxShadow: "2px 2px 0px var(--theme-text)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "0.25rem"
-                }}
-              >
-                <User size={14} color="var(--theme-text)" />
-                <span>PATIENT</span>
-              </button>
-            </div>
+          <div className="auth-roles">
+            {demoRoles.map((role) => {
+              const Icon = role.icon;
+              return (
+                <button
+                  key={role.key}
+                  type="button"
+                  className="auth-role"
+                  title={`${role.email} / ${role.password}`}
+                  onClick={() => fillCredentials(role.email, role.password)}
+                >
+                  <Icon size={16} aria-hidden="true" />
+                  <span>{role.label}</span>
+                </button>
+              );
+            })}
           </div>
-        </div>
+
+          <p className="auth-note">
+            Demo passes fill the form so you can review each role. Real accounts use the
+            <span style={{ color: "var(--color-ink)", fontWeight: 600 }}> @smarthospital.local </span>
+            domain.
+          </p>
+        </section>
       </main>
 
-      {/* Bottom Technical Footer */}
-      <footer style={{
-        paddingTop: "1.5rem",
-        borderTop: "1.5px solid var(--color-ink)",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "1rem",
-        fontSize: "0.75rem",
-        fontFamily: "var(--font-mono)",
-        color: "var(--color-muted)"
-      }}>
-        <div>SMART HOSPITAL PLATFORM © 2026</div>
-        <div>CLINICAL APPOINTMENTS & REAL-TIME QUEUE FLOW</div>
+      <footer className="auth-footer">
+        <span>Aegle Clinical OS · 2026</span>
+        <span>Appointments · Queue · Triage</span>
+        <span>TLS 1.3 · HS256 sessions</span>
       </footer>
     </div>
   );
