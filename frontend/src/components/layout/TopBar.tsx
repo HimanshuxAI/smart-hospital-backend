@@ -43,14 +43,14 @@ export function TopBar({
         {demoMode ? <span className="demo-badge">Demo data</span> : null}
       </div>
       <div className="topbar-actions">
-        <button className="icon-button" type="button" aria-label="Notifications">
+        <button className="icon-button" type="button" aria-label="Notifications" style={{ color: "var(--theme-muted)" }}>
           <Bell size={19} aria-hidden="true" />
         </button>
         <div className="user-summary">
           <Avatar name={user.email.split("@")[0] ?? user.email} size="sm" />
           <span>
-            <strong>{user.email}</strong>
-            <small>{user.role.toLowerCase()}</small>
+            <strong style={{ color: "var(--theme-text)" }}>{user.email}</strong>
+            <small style={{ color: "var(--theme-muted)" }}>{user.role.toLowerCase()}</small>
           </span>
         </div>
         <button
@@ -59,6 +59,7 @@ export function TopBar({
           aria-label="Sign out"
           disabled={signingOut}
           onClick={() => void handleSignOut()}
+          style={{ color: "var(--theme-muted)" }}
         >
           <LogOut size={19} aria-hidden="true" />
         </button>
