@@ -79,28 +79,28 @@ export function LoginPage() {
         justifyContent: "space-between",
         alignItems: "center",
         paddingBottom: "1.5rem",
-        borderBottom: "1.5px solid var(--color-ink)"
+        borderBottom: "1.5px solid var(--theme-border)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <div style={{
             width: "2.25rem",
             height: "2.25rem",
-            background: "var(--color-ink)",
-            color: "var(--bg-canvas)",
+            background: "var(--theme-primary)",
+            color: "var(--theme-surface)",
             display: "grid",
             placeItems: "center",
             fontWeight: 800,
             fontSize: "1rem",
-            fontFamily: "var(--font-display)",
-            borderRadius: "4px"
+            fontFamily: "var(--font-mono)",
+            borderRadius: "12px"
           }}>
             Æ
           </div>
           <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--theme-text)" }}>
               AEGLE CLINICAL OS
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", color: "var(--theme-muted)", textTransform: "uppercase" }}>
               SYS.ID: TOKYO-MED-992 // RUNNING
             </div>
           </div>
@@ -111,14 +111,14 @@ export function LoginPage() {
             to="/register"
             style={{
               padding: "0.45rem 1rem",
-              border: "1.5px solid var(--color-ink)",
-              borderRadius: "4px",
-              background: "#ffffff",
+              border: "1.5px solid var(--theme-border)",
+              borderRadius: "12px",
+              background: "var(--theme-surface)",
               fontSize: "0.8rem",
               fontWeight: 700,
               fontFamily: "var(--font-display)",
-              color: "var(--color-ink)",
-              boxShadow: "2px 2px 0px var(--color-ink)"
+              color: "var(--theme-text)",
+              boxShadow: "2px 2px 0px var(--theme-text)"
             }}
           >
             Create Profile →
@@ -197,11 +197,11 @@ export function LoginPage() {
 
         {/* Right Column: Physical Ticket / Brutalist Access Card */}
         <div style={{
-          background: "#ffffff",
-          border: "2px solid var(--color-ink)",
-          borderRadius: "8px",
+          background: "var(--theme-surface)",
+          border: "2px solid var(--theme-border)",
+          borderRadius: "20px",
           padding: "2.5rem",
-          boxShadow: "var(--shadow-hard-md)",
+          boxShadow: "0 10px 30px rgb(0 0 0 / 0.06)",
           position: "relative"
         }}>
           {/* Card Eyebrow */}
@@ -216,16 +216,16 @@ export function LoginPage() {
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
               ENTRY TERMINAL // SECURE AUTH
             </span>
-            <Fingerprint size={18} color="var(--color-ink)" />
+            <Fingerprint size={18} color="var(--theme-text)" />
           </div>
 
           {generalError && (
             <div role="alert" style={{
               padding: "0.75rem 1rem",
               marginBottom: "1.25rem",
-              border: "1.5px solid var(--color-ink)",
-              background: "#fee2e2",
-              color: "#991b1b",
+              border: "1.5px solid var(--theme-emergency)",
+              background: "rgba(214, 64, 69, 0.1)",
+              color: "var(--theme-emergency)",
               fontSize: "0.85rem",
               fontFamily: "var(--font-mono)",
               fontWeight: 700,
@@ -328,23 +328,23 @@ export function LoginPage() {
                 type="button"
                 onClick={() => fillCredentials("admin@smarthospital.local", "Admin@123")}
                 style={{
-                  background: "var(--bg-canvas)",
-                  border: "1.5px solid var(--color-ink)",
-                  borderRadius: "4px",
+                  background: "var(--theme-surface)",
+                  border: "1.5px solid var(--theme-border)",
+                  borderRadius: "12px",
                   padding: "0.6rem 0.25rem",
-                  color: "var(--color-ink)",
+                  color: "var(--theme-text)",
                   fontSize: "0.75rem",
                   fontFamily: "var(--font-mono)",
                   fontWeight: 700,
                   cursor: "pointer",
-                  boxShadow: "2px 2px 0px var(--color-ink)",
+                  boxShadow: "2px 2px 0px var(--theme-text)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   gap: "0.25rem"
                 }}
               >
-                <Shield size={14} color="var(--accent-vermilion)" />
+                <Shield size={14} color="var(--theme-accent)" />
                 <span>ADMIN</span>
               </button>
 
@@ -352,23 +352,23 @@ export function LoginPage() {
                 type="button"
                 onClick={() => fillCredentials("doctor@smarthospital.local", "Doctor@123")}
                 style={{
-                  background: "var(--bg-canvas)",
-                  border: "1.5px solid var(--color-ink)",
-                  borderRadius: "4px",
+                  background: "var(--theme-surface)",
+                  border: "1.5px solid var(--theme-border)",
+                  borderRadius: "12px",
                   padding: "0.6rem 0.25rem",
-                  color: "var(--color-ink)",
+                  color: "var(--theme-text)",
                   fontSize: "0.75rem",
                   fontFamily: "var(--font-mono)",
                   fontWeight: 700,
                   cursor: "pointer",
-                  boxShadow: "2px 2px 0px var(--color-ink)",
+                  boxShadow: "2px 2px 0px var(--theme-text)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   gap: "0.25rem"
                 }}
               >
-                <Stethoscope size={14} color="var(--color-ink)" />
+                <Stethoscope size={14} color="var(--theme-text)" />
                 <span>DOCTOR</span>
               </button>
 
@@ -376,23 +376,23 @@ export function LoginPage() {
                 type="button"
                 onClick={() => fillCredentials("patient@smarthospital.local", "Patient@123")}
                 style={{
-                  background: "var(--bg-canvas)",
-                  border: "1.5px solid var(--color-ink)",
-                  borderRadius: "4px",
+                  background: "var(--theme-surface)",
+                  border: "1.5px solid var(--theme-border)",
+                  borderRadius: "12px",
                   padding: "0.6rem 0.25rem",
-                  color: "var(--color-ink)",
+                  color: "var(--theme-text)",
                   fontSize: "0.75rem",
                   fontFamily: "var(--font-mono)",
                   fontWeight: 700,
                   cursor: "pointer",
-                  boxShadow: "2px 2px 0px var(--color-ink)",
+                  boxShadow: "2px 2px 0px var(--theme-text)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   gap: "0.25rem"
                 }}
               >
-                <User size={14} color="var(--color-ink)" />
+                <User size={14} color="var(--theme-text)" />
                 <span>PATIENT</span>
               </button>
             </div>
