@@ -50,8 +50,8 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
           <HeartPulse size={21} />
         </span>
         <div>
-          <strong style={{ color: "var(--color-ink)" }}>Smart Hospital</strong>
-          <small style={{ color: "var(--color-muted)" }}>{roleLabels[role]}</small>
+          <strong style={{ color: "var(--theme-text)" }}>Smart Hospital</strong>
+          <small style={{ color: "var(--theme-muted)" }}>{roleLabels[role]}</small>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
         })}
       </nav>
 
-      <div style={{ marginTop: "auto", paddingTop: "1rem", borderTop: "1.5px dashed var(--color-border)" }}>
+      <div style={{ marginTop: "auto", paddingTop: "1rem", borderTop: "1.5px dashed var(--theme-border)" }}>
         <button
           type="button"
           onClick={handleSignOut}
@@ -84,12 +84,12 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
             width: "100%",
             justifyContent: "flex-start",
             gap: "0.6rem",
-            color: "#dc2626",
-            borderColor: "var(--color-ink)",
+            color: "var(--theme-emergency)",
+            borderColor: "var(--theme-border)",
             fontSize: "0.82rem"
           }}
         >
-          <LogOut size={16} color="#dc2626" />
+          <LogOut size={16} color="var(--theme-emergency)" />
           <span>Sign Out</span>
         </button>
       </div>

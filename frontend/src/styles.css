@@ -12,6 +12,16 @@
   --theme-pulse-surface: #FFFFFF;
   --theme-pulse-text: #25302B;
   --theme-pulse-emergency: #D64045;
+  /* Semantic theme vars (Pulse values) */
+  --theme-bg: var(--theme-pulse-bg);
+  --theme-surface: var(--theme-pulse-surface);
+  --theme-text: var(--theme-pulse-text);
+  --theme-muted: #6b7280;
+  --theme-border: #e5e7eb;
+  --theme-primary: var(--theme-pulse-primary);
+  --theme-accent: var(--theme-pulse-accent);
+  --theme-emergency: var(--theme-pulse-emergency);
+  --theme-surface-raised: #f3f4f6;
   --color-muted: #52657a;
   --color-primary: #0f766e;
   --color-primary-strong: #115e59;
@@ -72,15 +82,15 @@
 
 html {
   min-width: 320px;
-  background: var(--color-surface-subtle);
+  background: var(--theme-bg);
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  color: var(--color-ink);
-  background: var(--color-surface-subtle);
+  color: var(--theme-text);
+  background: var(--theme-bg);
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
@@ -904,7 +914,7 @@ a {
   display: grid;
   grid-template-columns: 15.5rem minmax(0, 1fr);
   min-height: 100vh;
-  background: var(--color-surface-subtle);
+  background: var(--theme-bg);
 }
 
 .desktop-sidebar {
@@ -962,19 +972,19 @@ a {
   min-height: 2.75rem;
   border-radius: var(--radius-md);
   padding: 0.65rem 0.8rem;
-  color: var(--color-muted);
+  color: var(--theme-muted);
   text-decoration: none;
   font-weight: 700;
 }
 
 .sidebar-link:hover,
 .sidebar-link:focus-visible {
-  color: var(--color-ink);
-  background: var(--color-surface-subtle);
+  color: var(--theme-text);
+  background: var(--theme-surface-raised);
 }
 
 .sidebar-link-active {
-  color: var(--color-primary-strong);
+  color: var(--theme-primary);
   background: var(--color-primary-soft);
 }
 
