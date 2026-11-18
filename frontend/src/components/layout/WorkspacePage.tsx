@@ -8,14 +8,12 @@ import { PageHeader } from "./PageHeader";
 export function WorkspacePage({
   role,
   title,
-  eyebrow,
   description,
   actions,
   children,
 }: {
   role: UserRole;
   title: string;
-  eyebrow?: string;
   description?: string;
   actions?: ReactNode;
   children: ReactNode;
@@ -29,7 +27,6 @@ export function WorkspacePage({
   return (
     <AppShell role={role} user={user}>
       <PageHeader
-        {...(eyebrow ? { eyebrow } : {})}
         title={title}
         {...(description ? { description } : {})}
         {...(actions ? { actions } : {})}

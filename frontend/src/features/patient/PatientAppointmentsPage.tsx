@@ -131,7 +131,6 @@ export function PatientAppointmentsPage() {
   return (
     <WorkspacePage
       role="PATIENT"
-      eyebrow="Patient portal"
       title="My appointments"
       description="Upcoming visits, check-in, and your appointment history."
     >

@@ -84,7 +84,6 @@ export function AdminDoctorsPage() {
   return (
     <WorkspacePage
       role="ADMIN"
-      eyebrow="Administration"
       title="Doctors"
       description="Maintain the doctor directory that patients can browse and book."
       actions={

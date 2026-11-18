@@ -31,7 +31,6 @@ export function PatientQueuePage() {
   return (
     <WorkspacePage
       role="PATIENT"
-      eyebrow="Patient portal"
       title="Queue token"
       description="Your live position, triage level, and estimated waiting time."
     >

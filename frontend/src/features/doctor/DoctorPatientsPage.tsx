@@ -29,7 +29,6 @@ export function DoctorPatientsPage() {
   return (
     <WorkspacePage
       role="DOCTOR"
-      eyebrow="Doctor workspace"
       title="Patients"
       description="Appointments assigned to you, with visit reasons and arrival times."
     >

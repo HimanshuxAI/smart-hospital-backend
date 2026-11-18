@@ -89,7 +89,6 @@ export function PatientDoctorsPage() {
   return (
     <WorkspacePage
       role="PATIENT"
-      eyebrow="Patient portal"
       title="Find a doctor"
       description="Browse clinicians by department or specialty, then book an available slot."
     >

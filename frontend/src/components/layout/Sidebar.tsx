@@ -76,10 +76,6 @@ export function Sidebar({ role, onNavigate }: { role: UserRole; onNavigate?: () 
       </nav>
 
       <div className="sidebar-foot">
-        <div className="sidebar-status">
-          <span className="status-dot" aria-hidden="true" />
-          <span>All systems online</span>
-        </div>
         <button
           type="button"
           onClick={handleSignOut}

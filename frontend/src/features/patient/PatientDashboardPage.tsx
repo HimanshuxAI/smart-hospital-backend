@@ -21,7 +21,6 @@ export function PatientDashboardPage() {
   return (
     <WorkspacePage
       role="PATIENT"
-      eyebrow="Patient portal"
       title={data ? `Welcome, ${data.patientName}` : "Welcome"}
       description="Your next visit and live queue position at a glance."
     >

@@ -90,7 +90,6 @@ export function RegisterPage() {
       <main className="auth-main auth-centered">
         <section className="auth-card auth-card-wide" aria-labelledby="register-heading">
           <div className="auth-card-head">
-            <span className="page-eyebrow">Patient intake</span>
             <h2 id="register-heading">Create your profile.</h2>
             <p>A few details and you are ready to book your first visit.</p>
           </div>
@@ -217,9 +216,7 @@ export function RegisterPage() {
       </main>
 
       <footer className="auth-footer">
-        <span>Aegle Clinical OS · 2026</span>
-        <span>Patient intake</span>
-        <span>TLS 1.3 · HS256 sessions</span>
+        <span>Aegle Clinical OS</span>
       </footer>
     </div>
   );

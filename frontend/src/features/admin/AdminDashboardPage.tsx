@@ -19,7 +19,6 @@ export function AdminDashboardPage() {
   return (
     <WorkspacePage
       role="ADMIN"
-      eyebrow="Administration"
       title="Operations"
       description="A live snapshot of users, clinicians, and today's hospital activity."
     >

@@ -44,7 +44,6 @@ export function DoctorSchedulePage() {
   return (
     <WorkspacePage
       role="DOCTOR"
-      eyebrow="Doctor workspace"
       title="My schedule"
       description="Consultation slots and booked appointments for the selected day."
     >

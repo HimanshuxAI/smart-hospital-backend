@@ -41,7 +41,6 @@ export function AdminUsersPage() {
   return (
     <WorkspacePage
       role="ADMIN"
-      eyebrow="Administration"
       title="Users"
       description="Review every account, its role, and whether it can access hospital services."
     >

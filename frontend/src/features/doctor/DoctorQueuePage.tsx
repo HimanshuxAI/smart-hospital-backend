@@ -136,7 +136,6 @@ export function DoctorQueuePage() {
   return (
     <WorkspacePage
       role="DOCTOR"
-      eyebrow="Doctor workspace"
       title="Live queue"
       description="Patients ordered by triage priority, then by arrival time."
     >

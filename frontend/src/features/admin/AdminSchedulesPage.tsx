@@ -80,7 +80,6 @@ export function AdminSchedulesPage() {
   return (
     <WorkspacePage
       role="ADMIN"
-      eyebrow="Administration"
       title="Schedules"
       description="Publish and withdraw doctor consultation slots."
       actions={

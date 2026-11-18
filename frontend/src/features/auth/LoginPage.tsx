@@ -103,11 +103,6 @@ export function LoginPage() {
 
       <main className="auth-main">
         <section className="auth-editorial" aria-hidden="true">
-          <span className="auth-kicker">
-            <span className="auth-kicker-dot" />
-            Live care coordination
-          </span>
-
           <h1>
             Care that moves at the <em>speed</em> of need.
           </h1>
@@ -168,7 +163,6 @@ export function LoginPage() {
 
         <section className="auth-card" aria-labelledby="signin-heading">
           <div className="auth-card-head">
-            <span className="page-eyebrow">Secure sign-in</span>
             <h2 id="signin-heading">Welcome back.</h2>
             <p>Pick up exactly where your day left off.</p>
           </div>
@@ -264,9 +258,7 @@ export function LoginPage() {
       </main>
 
       <footer className="auth-footer">
-        <span>Aegle Clinical OS · 2026</span>
-        <span>Appointments · Queue · Triage</span>
-        <span>TLS 1.3 · HS256 sessions</span>
+        <span>Aegle Clinical OS</span>
       </footer>
     </div>
   );

@@ -19,7 +19,6 @@ export function DoctorDashboardPage() {
   return (
     <WorkspacePage
       role="DOCTOR"
-      eyebrow="Doctor workspace"
       title={data ? `Doctor station - ${data.doctorName}` : "Doctor station"}
       description="Today's appointments and queue pressure at a glance."
     >
