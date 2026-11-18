@@ -300,10 +300,11 @@ a {
 }
 
 .card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--theme-border);
+  border-radius: 20px;
+  background: var(--theme-surface);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.06);
+  color: var(--theme-text);
 }
 
 .card-header {
@@ -312,7 +313,8 @@ a {
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-5);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--theme-border);
+  border-radius: 20px 20px 0 0;
 }
 
 .card-title {
@@ -624,10 +626,10 @@ a {
 
 .table-region {
   overflow-x: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--theme-border);
+  border-radius: 16px;
+  background: var(--theme-surface);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.06);
 }
 
 .data-table {
@@ -641,17 +643,16 @@ a {
   padding: 0.85rem 1rem;
   text-align: left;
   vertical-align: middle;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--theme-border);
 }
 
 .data-table th {
-  color: var(--color-muted);
-  background: var(--color-surface-subtle);
-  font-size: 0.75rem;
+  color: var(--theme-muted);
+  background: var(--theme-surface-raised);
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
 .data-table tbody tr:last-child td {
@@ -659,12 +660,12 @@ a {
 }
 
 .data-table tbody tr:hover td {
-  background: var(--color-surface-raised);
+  background: var(--theme-surface-raised);
 }
 
 .table-primary {
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--theme-text);
 }
 
 .table-empty {
@@ -695,8 +696,8 @@ a {
 
 .metric-label {
   display: block;
-  color: var(--color-muted);
-  font-size: 0.75rem;
+  color: var(--theme-muted);
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -705,9 +706,10 @@ a {
 .metric-value {
   display: block;
   margin-top: 0.35rem;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
+  color: var(--theme-primary);
 }
 
 .metric-value-text {
@@ -1096,24 +1098,26 @@ a {
 
 .page-header h1 {
   margin: 0;
-  color: var(--color-ink);
-  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  color: var(--theme-text);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
   line-height: 1.15;
+  font-weight: 700;
 }
 
 .page-header p {
   max-width: 48rem;
   margin: 0.5rem 0 0;
-  color: var(--color-muted);
+  color: var(--theme-muted);
+  font-size: 1rem;
 }
 
 .page-eyebrow {
   display: block;
   margin-bottom: 0.35rem;
-  color: var(--color-primary-strong);
-  font-size: 0.75rem;
+  color: var(--theme-primary);
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
