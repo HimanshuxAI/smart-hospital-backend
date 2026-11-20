@@ -1,0 +1,15 @@
+export const queryKeys = {
+  departments: ["departments"] as const,
+  doctors: ["doctors"] as const,
+  doctor: (doctorId: number) => ["doctors", doctorId] as const,
+  slots: (doctorId: number, date: string) => ["slots", doctorId, date] as const,
+  appointments: (scope: string) => ["appointments", scope] as const,
+  queue: (scope: string) => ["queue", scope] as const,
+  queueEntry: (entryId: number) => ["queue", "entry", entryId] as const,
+  adminUsers: ["admin", "users"] as const,
+  doctorProfile: (doctorId: number) => ["doctor-profile", doctorId] as const,
+  ownDoctorProfile: ["doctor-profile", "own"] as const,
+  patientDashboard: ["dashboard", "patient"] as const,
+  doctorDashboard: ["dashboard", "doctor"] as const,
+  adminDashboard: ["dashboard", "admin"] as const,
+};

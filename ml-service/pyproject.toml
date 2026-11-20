@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools==84.2.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smart-hospital-ml"
+version = "1.0.0"
+description = "Smart Hospital machine-learning sidecar"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.163.0",
+    "uvicorn==0.54.0",
+    "pydantic==2.14.3",
+    "scikit-learn==1.7.2",
+    "joblib==1.5.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.2.0",
+    "httpx==0.28.1",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,204 @@
+package com.smarthospital;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ClassPathResource;
+
+class ApplicationProfileConfigurationTests {
+
+    @Test
+    void commonConfigurationRequiresDatabaseEnvironmentValues() throws IOException {
+        PropertySource<?> configuration = load("application.yml");
+
+        assertThat(value(configuration, "spring.datasource.url")).isEqualTo("${DB_URL}");
+        assertThat(value(configuration, "spring.datasource.username")).isEqualTo("${DB_USERNAME}");
+        assertThat(value(configuration, "spring.datasource.password")).isEqualTo("${DB_PASSWORD}");
+        assertThat(value(configuration, "spring.datasource.url"))
+                .doesNotContain("useSSL=false", "allowPublicKeyRetrieval=true");
+    }
+
+    @Test
+    void commonConfigurationRequiresSecurityEnvironmentValues() throws IOException {
+        PropertySource<?> configuration = load("application.yml");
+
+        assertThat(value(configuration, "spring.security.user.name")).isEqualTo("${SECURITY_USERNAME}");
+        assertThat(value(configuration, "spring.security.user.password")).isEqualTo("${SECURITY_PASSWORD}");
+        assertThat(value(configuration, "smart-hospital.security.jwt.secret")).isEqualTo("${JWT_SECRET}");
+        assertThat(value(configuration, "smart-hospital.security.jwt.issuer"))
+                .isEqualTo("${JWT_ISSUER:smart-hospital-backend}");
+        assertThat(value(configuration, "spring.jackson.deserialization.fail-on-unknown-properties"))
+                .isEqualTo("true");
+        assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:false}");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins"))
+                .isEqualTo("${CORS_ALLOWED_ORIGINS:}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.window"))
+                .isEqualTo("${AUTH_RATE_LIMIT_WINDOW:PT1M}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.max-tracked-entries"))
+                .isEqualTo("${AUTH_RATE_LIMIT_MAX_TRACKED_ENTRIES:10000}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.login.account-limit"))
+                .isEqualTo("${AUTH_LOGIN_ACCOUNT_RATE_LIMIT:5}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.login.ip-limit"))
+                .isEqualTo("${AUTH_LOGIN_IP_RATE_LIMIT:20}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.registration.account-limit"))
+                .isEqualTo("${AUTH_REGISTRATION_ACCOUNT_RATE_LIMIT:3}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.registration.ip-limit"))
+                .isEqualTo("${AUTH_REGISTRATION_IP_RATE_LIMIT:10}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.refresh.token-limit"))
+                .isEqualTo("${AUTH_REFRESH_TOKEN_RATE_LIMIT:10}");
+        assertThat(value(configuration, "smart-hospital.security.rate-limit.refresh.ip-limit"))
+                .isEqualTo("${AUTH_REFRESH_IP_RATE_LIMIT:30}");
+    }
+
+    @Test
+    void commonConfigurationSeparatesAccessAndRefreshTokenLifetimes() throws IOException {
+        PropertySource<?> configuration = load("application.yml");
+
+        assertThat(value(configuration, "smart-hospital.security.jwt.access-token-expiration"))
+                .isEqualTo("${JWT_ACCESS_TOKEN_EXPIRATION:PT15M}");
+        assertThat(value(configuration, "smart-hospital.security.refresh-token.expiration"))
+                .isEqualTo("${JWT_REFRESH_TOKEN_EXPIRATION:P7D}");
+        assertThat(value(configuration, "smart-hospital.security.jwt.refresh-token-expiration"))
+                .isNull();
+    }
+
+    @Test
+    void commonConfigurationUses750MillisecondMlTimeouts() throws IOException {
+        PropertySource<?> configuration = load("application.yml");
+
+        assertThat(value(configuration, "smart-hospital.ml.connect-timeout"))
+                .isEqualTo("${ML_SERVICE_CONNECT_TIMEOUT:750ms}");
+        assertThat(value(configuration, "smart-hospital.ml.read-timeout"))
+                .isEqualTo("${ML_SERVICE_READ_TIMEOUT:750ms}");
+    }
+
+    @Test
+    void localConfigurationDefinesExplicitLocalDatabaseDefaults() throws IOException {
+        PropertySource<?> configuration = load("application-local.yml");
+
+        assertThat(value(configuration, "spring.datasource.url"))
+                .isEqualTo("jdbc:mysql://localhost:3306/smart_hospital_local?serverTimezone=UTC");
+        assertThat(value(configuration, "spring.datasource.username"))
+                .isEqualTo("smart_hospital_local");
+        assertThat(value(configuration, "spring.datasource.password"))
+                .isEqualTo("local-development-password");
+        assertThat(value(configuration, "spring.datasource.url"))
+                .doesNotContain("useSSL=false", "allowPublicKeyRetrieval=true");
+        assertThat(value(configuration, "spring.datasource.hikari.data-source-properties.sslMode"))
+                .isNull();
+        assertThat(value(configuration, "spring.datasource.hikari.data-source-properties.useSSL"))
+                .isNull();
+        assertThat(value(configuration, "spring.security.user.name")).isEqualTo("local-user");
+        assertThat(value(configuration, "spring.security.user.password"))
+                .isEqualTo("local-development-password");
+        assertThat(value(configuration, "smart-hospital.security.jwt.secret"))
+                .isEqualTo("local-development-jwt-secret-change-before-production");
+        assertThat(value(configuration, "smart-hospital.security.jwt.issuer"))
+                .isEqualTo("smart-hospital-backend-local");
+        assertThat(value(configuration, "app.seed.enabled")).isEqualTo("${APP_SEED_ENABLED:true}");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins[0]"))
+                .isEqualTo("http://localhost:3000");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins[1]"))
+                .isEqualTo("http://localhost:5173");
+    }
+
+    @Test
+    void productionConfigurationRequiresEnvironmentValuesAndVerifiesTls() throws IOException {
+        PropertySource<?> configuration = load("application-prod.yml");
+
+        assertThat(value(configuration, "spring.datasource.url")).isEqualTo("${DB_URL}");
+        assertThat(value(configuration, "spring.datasource.username")).isEqualTo("${DB_USERNAME}");
+        assertThat(value(configuration, "spring.datasource.password")).isEqualTo("${DB_PASSWORD}");
+        assertThat(value(configuration, "spring.datasource.hikari.data-source-properties.sslMode"))
+                .isEqualTo("VERIFY_IDENTITY");
+        assertThat(value(configuration, "spring.datasource.url"))
+                .doesNotContain("useSSL=false", "allowPublicKeyRetrieval=true");
+        assertThat(value(configuration, "spring.security.user.name")).isEqualTo("${SECURITY_USERNAME}");
+        assertThat(value(configuration, "spring.security.user.password")).isEqualTo("${SECURITY_PASSWORD}");
+        assertThat(value(configuration, "smart-hospital.security.jwt.secret")).isEqualTo("${JWT_SECRET}");
+        assertThat(value(configuration, "smart-hospital.security.jwt.issuer")).isEqualTo("${JWT_ISSUER}");
+        assertThat(value(configuration, "smart-hospital.security.refresh-token.expiration"))
+                .isEqualTo("${JWT_REFRESH_TOKEN_EXPIRATION}");
+        assertThat(value(configuration, "smart-hospital.security.cors.allowed-origins"))
+                .isEqualTo("${CORS_ALLOWED_ORIGINS}");
+    }
+
+    @Test
+    void localProfileResolvesLocalDefaults() {
+        new ApplicationContextRunner()
+                .withInitializer(new ConfigDataApplicationContextInitializer())
+                .withPropertyValues("spring.profiles.active=local")
+                .run(context -> {
+                    assertThat(context.getEnvironment().getProperty("spring.datasource.url"))
+                            .isEqualTo("jdbc:mysql://localhost:3306/smart_hospital_local?serverTimezone=UTC");
+                    assertThat(context.getEnvironment().getProperty("spring.datasource.username"))
+                            .isEqualTo("smart_hospital_local");
+                    assertThat(context.getEnvironment().getProperty("spring.datasource.password"))
+                            .isEqualTo("local-development-password");
+                    assertThat(context.getEnvironment().getProperty("spring.security.user.name"))
+                            .isEqualTo("local-user");
+                    assertThat(context.getEnvironment().getProperty("smart-hospital.security.jwt.secret"))
+                            .isEqualTo("local-development-jwt-secret-change-before-production");
+                });
+    }
+
+    @Test
+    void localProfileAllowsSeedEnvironmentOverrideToDisableSeeding() {
+        new ApplicationContextRunner()
+                .withInitializer(new ConfigDataApplicationContextInitializer())
+                .withPropertyValues(
+                        "spring.profiles.active=local",
+                        "APP_SEED_ENABLED=false")
+                .run(context -> assertThat(context.getEnvironment().getProperty("app.seed.enabled"))
+                        .isEqualTo("false"));
+    }
+
+    @Test
+    void productionProfileResolvesEnvironmentValuesAndTlsConfiguration() {
+        new ApplicationContextRunner()
+                .withInitializer(new ConfigDataApplicationContextInitializer())
+                .withPropertyValues(
+                        "spring.profiles.active=prod",
+                        "DB_URL=jdbc:mysql://prod.example/smart_hospital",
+                        "DB_USERNAME=prod-user",
+                        "DB_PASSWORD=prod-password",
+                        "SECURITY_USERNAME=prod-security-user",
+                        "SECURITY_PASSWORD=prod-security-password",
+                        "JWT_SECRET=production-test-jwt-secret-with-at-least-32-characters")
+                .run(context -> {
+                    assertThat(context.getEnvironment().getProperty("spring.datasource.url"))
+                            .isEqualTo("jdbc:mysql://prod.example/smart_hospital");
+                    assertThat(context.getEnvironment().getProperty("spring.datasource.username"))
+                            .isEqualTo("prod-user");
+                    assertThat(context.getEnvironment().getProperty("spring.datasource.password"))
+                            .isEqualTo("prod-password");
+                    assertThat(context.getEnvironment().getProperty("spring.security.user.name"))
+                            .isEqualTo("prod-security-user");
+                    assertThat(context.getEnvironment().getProperty("smart-hospital.security.jwt.secret"))
+                            .isEqualTo("production-test-jwt-secret-with-at-least-32-characters");
+                    assertThat(context.getEnvironment()
+                                    .getProperty("spring.datasource.hikari.data-source-properties.sslMode"))
+                            .isEqualTo("VERIFY_IDENTITY");
+                });
+    }
+
+    private static String value(PropertySource<?> configuration, String propertyName) {
+        Object propertyValue = configuration.getProperty(propertyName);
+        return propertyValue == null ? null : propertyValue.toString();
+    }
+
+    private static PropertySource<?> load(String resourceName) throws IOException {
+        ClassPathResource resource = new ClassPathResource(resourceName);
+        assertThat(resource.exists()).as("classpath resource %s", resourceName).isTrue();
+
+        List<PropertySource<?>> propertySources = new YamlPropertySourceLoader().load(resourceName, resource);
+        assertThat(propertySources).hasSize(1);
+        return propertySources.getFirst();
+    }
+}

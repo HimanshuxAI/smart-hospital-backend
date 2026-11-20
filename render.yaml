@@ -1,0 +1,45 @@
+# Render Blueprint Specification
+services:
+  # 1. Python ML FastAPI Service
+  - type: web
+    name: smart-hospital-ml
+    env: python
+    rootDir: ml-service
+    buildCommand: pip install .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    autoDeploy: true
+
+  # 2. Spring Boot Core Backend
+  - type: web
+    name: smart-hospital-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: demo
+      - key: APP_SEED_ENABLED
+        value: "true"
+      - key: SERVER_PORT
+        value: "8080"
+      - key: ML_SERVICE_BASE_URL
+        value: https://smart-hospital-ml.onrender.com
+
+  # 3. React Frontend (Static Site)
+  - type: web
+    name: smart-hospital-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://smart-hospital-backend-njkt.onrender.com/api/v1
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
